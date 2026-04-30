@@ -1,0 +1,42 @@
+# Topics recorded by recording.launch.py
+# Edit this list to add/remove topics as the sensor setup evolves.
+# Estimated aggregate bandwidth at full rate: ~1.5-2 GB/min.
+
+topics:
+  # LiDAR
+  - /lidar/points                         # PointCloud2, ~10 Hz, ~60 MB/min
+
+  # OAK-4D Luxonis
+  - /oak4d/rgb/image_raw                  # Image, 30 Hz
+  - /oak4d/depth/image_raw                # Image, 30 Hz
+  - /oak4d/rgb/camera_info
+  - /oak4d/imu/data                       # Imu, ~500 Hz
+
+  # OAK-D Lite Luxonis
+  - /oakd_lite/rgb/image_raw              # Image, 30 Hz
+  - /oakd_lite/depth/image_raw            # Image, 30 Hz
+  - /oakd_lite/rgb/camera_info
+
+  # Intel RealSense
+  - /realsense/color/image_raw            # Image, 30 Hz
+  - /realsense/depth/image_rect_raw       # Image, 30 Hz
+  - /realsense/color/camera_info
+
+  # Xsens MTi-610R IMU
+  - /imu/data                             # Imu, 400 Hz
+  - /imu/mag                              # MagneticField, 100 Hz
+
+  # u-blox GNSS
+  - /gnss/fix                             # NavSatFix, 5-10 Hz
+  - /gnss/fix_velocity                    # TwistWithCovarianceStamped, 5-10 Hz
+
+  # TF tree — essential for extrinsic calibration replay
+  - /tf
+  - /tf_static
+
+# Bandwidth reduction options (uncomment if storage is a bottleneck):
+# Replace uncompressed image topics above with compressed equivalents:
+#   - /oak4d/rgb/image_raw/compressed
+#   - /oakd_lite/rgb/image_raw/compressed
+#   - /realsense/color/image_raw/compressed
+# Note: depth images do not compress well; keep them uncompressed.

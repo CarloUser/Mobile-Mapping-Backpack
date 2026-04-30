@@ -1,0 +1,22 @@
+hesai_ros_driver_node:
+  ros__parameters:
+    # Network — set device_ip_address to empty string for auto-detect,
+    # or specify the JT128's IP (default from factory: 192.168.1.201)
+    device_ip_address: "192.168.1.201"
+    lidar_recv_port: 2368
+    gps_recv_port: 10110
+
+    sensor_model: "JT128"
+    frame_id: "lidar_hesai"
+
+    # Rotation rate (Hz). Lower rate = denser point cloud per revolution.
+    # 10 Hz is the default and a good starting point.
+    rotation_speed: 600         # RPM; 600 = 10 Hz, 1200 = 20 Hz
+
+    # Point cloud topic remapped in launch file to /lidar/points
+    # Leave pcap_path empty for live sensor; set for bag-file replay
+    pcap_path: ""
+    correction_file_path: ""
+
+    # PTP configuration — enable after setting up linuxptp (see 03_time_sync.md)
+    # ptp_master_ip: "192.168.1.100"
