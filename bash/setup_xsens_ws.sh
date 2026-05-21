@@ -40,15 +40,29 @@ mkdir -p $WS/src
 cd $WS/src
 
 # -----------------------------
-# STEP 4: Clone driver
+# STEP 4: Extract driver from ZIP
 # -----------------------------
-echo "[4/7] Cloning driver..."
+echo "[4/7] Extracting driver from Downloads..."
 
-if [ ! -d "ros2_xsens_mti_driver" ]; then
-    git clone https://github.com/xsenssupport/ros2_xsens_mti_driver.git
-else
-    echo "Driver already exists"
+DOWNLOAD_DIR=~/Downloads
+ZIP_NAME="ros2_xsens_mti_driver-main.zip"
+EXTRACT_DIR="$DOWNLOAD_DIR/ros2_xsens_mti_driver-main"
+
+if [ ! -f "$DOWNLOAD_DIR/$ZIP_NAME" ]; then
+    echo "❌ ZIP file not found: $ZIP_NAME"
+    exit 1
 fi
+
+# unzip
+unzip -o "$DOWNLOAD_DIR/$ZIP_NAME" -d $DOWNLOAD_DIR
+
+# move into workspace src
+mv "$EXTRACT_DIR" "$WS/src/ros2_xsens_mti_driver"
+
+# cleanup
+rm -f "$DOWNLOAD_DIR/$ZIP_NAME"
+
+echo "✔ Driver extracted and moved to workspace"
 
 # -----------------------------
 # STEP 5: Fix permissions
