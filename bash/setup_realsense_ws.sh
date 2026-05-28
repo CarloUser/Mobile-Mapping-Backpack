@@ -7,7 +7,7 @@ echo "RealSense ROS2 (SOURCE INSTALL)"
 echo "======================================"
 
 ROS_DISTRO=humble
-WS=~/realsense_ws
+WS=~/ros2_ws
 
 # -----------------------------
 # STEP 1: Source ROS
@@ -20,7 +20,10 @@ source /opt/ros/$ROS_DISTRO/setup.bash
 # -----------------------------
 echo "[2/6] Creating workspace..."
 
-mkdir -p $WS/src
+if [ ! -d "$WS" ]; then
+	echo "Directory is missing! Creating it now..."
+	mkdir -p $WS/src
+
 cd $WS/src
 
 # -----------------------------
