@@ -9,9 +9,10 @@ echo "======================================"
 # -----------------------------
 # CONFIG
 # -----------------------------
-SDK_URL="https://www.insta360.com/sdk/record?auto_jump=true&_gl=1*jqebgd*_up*MQ..*_ga*MTA4MTU2ODQxMi4xNzc5MzU4NzIz*_ga_ZMDD1VX0M1*czE3NzkzNTg3MjIkbzEkZzAkdDE3NzkzNTg3MjIkajYwJGwwJGgw*_ga_7TV2BE92TS*czE3NzkzNTg3MjMkbzEkZzAkdDE3NzkzNTg3MjMkajYwJGwwJGgw"   # <-- OPTIONAL: put direct download link here
-ZIP_NAME="insta360_sdk.zip"
+DOWNLOAD_DIR=~/Downloads
+ZIP_NAME="insta360_sdk.zip"   # change if needed
 INSTALL_DIR=~/insta360_sdk
+ZIP_PATH="$DOWNLOAD_DIR/$ZIP_NAME"
 
 # -----------------------------
 # STEP 1: Install tools
@@ -19,41 +20,42 @@ INSTALL_DIR=~/insta360_sdk
 echo "[1/5] Installing tools..."
 
 sudo apt-get update
-sudo apt-get install -y unzip wget
+sudo apt-get install -y unzip
 
 # -----------------------------
-# STEP 2: Download (optional)
+# STEP 2: Use existing ZIP
 # -----------------------------
-echo "[2/5] Downloading SDK..."
+echo "[2/5] Using SDK from Downloads..."
 
-if [ -n "$SDK_URL" ]; then
-    wget -O $ZIP_NAME "$SDK_URL"
-else
-    echo "⚠ No URL provided."
-    echo "Please place your SDK zip as: $ZIP_NAME"
-    read -p "Press ENTER to continue..."
+if [ ! -f "$ZIP_PATH" ]; then
+    echo "ZIP not found at: $ZIP_PATH"
+    echo "Please place your SDK zip in ~/Downloads"
+    exit 1
 fi
+
+echo "✔ Found: $ZIP_PATH"
 
 # -----------------------------
 # STEP 3: Create install dir
 # -----------------------------
 echo "[3/5] Creating install directory..."
 
-mkdir -p $INSTALL_DIR
+mkdir -p "$INSTALL_DIR"
 
 # -----------------------------
-# STEP 4: Unzip
+# STEP 4: Extract SDK
 # -----------------------------
 echo "[4/5] Extracting SDK..."
 
-unzip -o $ZIP_NAME -d $INSTALL_DIR
+unzip -o "$ZIP_PATH" -d "$INSTALL_DIR"
 
 # -----------------------------
 # STEP 5: Cleanup
 # -----------------------------
 echo "[5/5] Cleaning up..."
 
-rm -f $ZIP_NAME
+rm -f "$ZIP_PATH"
+echo "✔ ZIP removed from Downloads"
 
 echo "======================================"
 echo "Insta360 SDK setup COMPLETE"
@@ -61,4 +63,4 @@ echo "======================================"
 
 echo ""
 echo "Location:"
-echo "$INSTALL_DIR"
+echo "$INSTALL_DIR">
