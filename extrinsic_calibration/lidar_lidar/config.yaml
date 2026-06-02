@@ -1,0 +1,27 @@
+# Configuration for motion-based Hesai <-> Livox extrinsic calibration.
+# Edit topic names to match your actual recording, then pass --config config.yaml.
+
+bag:
+  # ROS 2 point cloud topics recorded on the rig (sensor_msgs/PointCloud2).
+  hesai_topic: /lidar/points        # Hesai JT128 (reference) - confirmed in repo topics.yaml
+  livox_topic: /livox/lidar         # Livox Avia - CONFIRM actual name from livox_lidar_launch.py
+
+odometry:
+  # KISS-ICP runs once per topic. These defaults suit indoor/handheld mapping.
+  deskew: true
+  max_range: 60.0                   # m  (Hesai short range; clip Livox the same way)
+  min_range: 0.5                    # m
+  voxel_size: 0.5                   # m  (downsampling; 0.3-1.0 typical)
+
+pairing:
+  stride: 5                         # compare frames N apart for larger motions (10 Hz -> 0.5 s)
+  min_angle_deg: 3.0                # discard near-pure-translation pairs (ill-conditioned)
+  min_observability: 0.10           # warn if stacked rotation axes are near-degenerate
+
+reference_frame: lidar_hesai        # Hesai is the fixed reference; we refine base_link->livox
+child_frame: lidar_livox_avia
+
+paths:
+  # Defaults; override on the command line as needed.
+  initial_extrinsics: ../../ros2_ws/src/mmb_bringup/config/extrinsics_initial.yaml
+  output_extrinsics: ../../ros2_ws/src/mmb_bringup/config/extrinsics_calibrated.yaml

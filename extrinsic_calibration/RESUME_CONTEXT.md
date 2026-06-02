@@ -1,6 +1,6 @@
 # Resume Context: Mobile Mapping Backpack Extrinsic Calibration
 
-Last updated: 2026-06-02
+Last updated: 2026-06-02 (sensor driver setup scripts now merged from `mazi`)
 
 This file is a handoff summary for resuming work on the mobile mapping backpack
 extrinsic calibration setup.
@@ -181,7 +181,47 @@ Modified:
 - `ros2_ws/src/mmb_bringup/package.xml`
   - Added runtime dependency `python3-yaml`.
 
-Important: at the time this file was created, these changes were not committed.
+These changes are now committed and pushed to
+`origin/claude/plan-backpack-project-U5DX0`
+(commit "Add initial extrinsic calibration setup ...").
+
+## Driver Integration Status (updated 2026-06-02)
+
+The sensor driver/setup scripts were merged from branch `mazi` into
+`claude/plan-backpack-project-U5DX0`. They live in a new top-level `bash/`
+folder (see `bash/README.md` and `bash/launch_commands.md`). The merge was
+conflict-free; the driver scripts and the extrinsic-calibration files do not
+overlap.
+
+Driver ROS packages and launch entry points are now known (from
+`bash/launch_commands.md`):
+
+| Sensor | ROS package | Launch / run |
+| --- | --- | --- |
+| HESAI JT128 | `hesai_ros_driver` | `ros2 launch hesai_ros_driver start.py` |
+| Livox Avia | `livox_ros2_avia` | `livox_lidar_launch.py` (PointCloud2) |
+| OAK-4D | `depthai_ros_driver_v3` | `driver.launch.py` |
+| OAK-D Lite | `depthai_ros_driver_v3` | `driver.launch.py` (shared with OAK-4D) |
+| OAK-1 | (not yet defined) | section empty in launch_commands.md |
+| Intel RealSense | `realsense_ros2_camera` | `ros2 run realsense_ros2_camera realsense_ros2_camera` |
+| Xsens MTi-610R | `xsens_mti_ros2_driver` | `xsens_mti_node.launch.py` |
+| u-blox GNSS | `ublox_gps` | `ublox_gps_node-launch.py` |
+| Insta360 | (SDK + ws scripts present) | launch command not yet documented |
+
+Still UNCONFIRMED after the merge (verify on the real ROS machine):
+
+- Actual published topic names and message `frame_id`s for every driver
+  (the extrinsics config assumes the ROS frame names in the table in
+  "Generated ROS Extrinsics Config"; the drivers must publish matching
+  `frame_id`s or a bridge static TF is needed).
+- OAK-4D and OAK-D Lite both use `depthai_ros_driver_v3` with the same
+  `driver.launch.py`; confirm how the two devices are distinguished (device
+  id / namespace) so their frames/topics do not collide.
+- Insta360 launch file, image/camera_info topics, and `frame_id`.
+- OAK-1 driver/launch (section is empty) and whether it is mounted at all.
+
+Important: at the time the calibration files were first created, these changes
+were not committed. They are now committed and pushed.
 
 ## Static TF Launch Behavior
 
@@ -273,16 +313,15 @@ compiled extrinsic_calibration\scripts\validate_initial_extrinsics.py
 
 1. Confirm `Oak_4_light` is really the OAK-D Lite.
 2. Confirm whether OAK-1 is physically mounted and should be launched/recorded.
-3. Confirm actual Insta360 ROS driver:
-   - package name
+3. Confirm actual Insta360 ROS driver (package now installed via
+   `bash/setup_insta360_*`, but launch file not yet documented):
    - launch file
    - image topics
    - camera info topic
    - frame_id
-4. Confirm actual Livox Avia ROS driver:
-   - package name
-   - launch file
-   - `PointCloud2` topic
+4. Livox Avia ROS driver is now known to be `livox_ros2_avia`
+   (`livox_lidar_launch.py` for PointCloud2). Still confirm:
+   - actual `PointCloud2` topic name
    - native Livox topic, if recorded
    - frame_id
 5. Confirm whether camera CAD frames are body-style frames or optical frames.
