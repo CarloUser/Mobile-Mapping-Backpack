@@ -6,7 +6,7 @@ echo "======================================"
 echo "Livox ROS2 Avia Setup"
 echo "======================================"
 
-WS= $WS
+WS=~/ros2_ws
 
 # -----------------------------
 # STEP 1: Source ROS2
@@ -17,13 +17,10 @@ source /opt/ros/humble/setup.bash
 # -----------------------------
 # STEP 2: Create workspace
 # -----------------------------
-echo "[2/5] Creating livox workspace..."
+echo "[2/5] Creating workspace..."
 
-if [ ! -d $WS ]; then
-    mkdir -p $WS/src
-else
-    echo "WS already exists."
-cd $WS/src
+mkdir -p "$WS/src"
+cd "$WS/src"
 
 # -----------------------------
 # STEP 3: Clone repo
@@ -41,7 +38,10 @@ fi
 # -----------------------------
 echo "[4/5] Building workspace..."
 
-cd $WS
+cd "$WS"
+
+sudo rosdep init 2>/dev/null || true
+rosdep update
 
 rosdep install --from-paths src --ignore-src -r -y
 

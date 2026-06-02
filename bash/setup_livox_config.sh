@@ -19,15 +19,43 @@ fi
 echo "[1/3] Editing Livox config..."
 
 # -----------------------------
-# USER INPUT
+# OVERWRITE lidar_config
 # -----------------------------
-read -p "Enter Livox broadcast code (e.g. 3JEDLB1001276511): " CODE
 
-# -----------------------------
-# APPLY CHANGES
-# -----------------------------
-sed -i "s/\"broadcast_code\": \".*\"/\"broadcast_code\": \"$CODE\"/" $CONFIG_FILE
-sed -i "s/\"enable_connect\": false/\"enable_connect\": true/" $CONFIG_FILE
+python3 <<EOF
+import json
+
+cfg_file = "$CONFIG_FILE"
+
+with open(cfg_file, "r") as f:
+    data = json.load(f)
+
+data["lidar_config"] = [
+    {
+        "broadcast_code": "3JEDLB100127651",
+        "enable_connect": True,
+        "enable_fan": True,
+        "return_mode": 0,
+        "coordinate": 0,
+        "imu_rate": 1,
+        "extrinsic_parameter_source": 0
+    },
+    {
+        "broadcast_code": "3JEDLCL0016V731",
+        "enable_connect": True,
+        "enable_fan": True,
+        "return_mode": 0,
+        "coordinate": 0,
+        "imu_rate": 1,
+        "extrinsic_parameter_source": 0
+    }
+]
+
+with open(cfg_file, "w") as f:
+    json.dump(data, f, indent=4)
+
+print("Livox config updated.")
+EOF
 
 echo "[2/3] Config updated"
 
@@ -35,7 +63,7 @@ echo "[2/3] Config updated"
 # SHOW RESULT
 # -----------------------------
 echo "[3/3] Final config:"
-grep -E "broadcast_code|enable_connect" $CONFIG_FILE
+grep -E "broadcast_code|enable_connect" "$CONFIG_FILE"
 
 echo "======================================"
 echo "DONE"
