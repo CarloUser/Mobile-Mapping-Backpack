@@ -1,0 +1,25 @@
+%YAML:1.0
+---
+camera_name: oak1_back
+camera_matrix: !!opencv-matrix
+   rows: 3
+   cols: 3
+   dt: d
+   data: [ 1779.4982473869663, 0., 1869.745649483518, 0.,
+       1752.9950333074803, 1125.4892189896002, 0., 0., 1. ]
+dist_coeffs: !!opencv-matrix
+   rows: 1
+   cols: 5
+   dt: d
+   data: [ 0.12163080111616054, -0.14205379953035585,
+       -0.0028231232365265846, 0.0064897201354622448,
+       0.019779075566432144 ]
+reprojection_error: 3.2550296873792508
+image_width: 3840
+image_height: 2160
+fisheye_model: !!opencv-matrix
+   rows: 4
+   cols: 1
+   dt: d
+   data: [ 0., 0., 0., 0. ]
+valid_frames: 30

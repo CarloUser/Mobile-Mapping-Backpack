@@ -1,0 +1,25 @@
+%YAML:1.0
+---
+camera_name: intel_back
+camera_matrix: !!opencv-matrix
+   rows: 3
+   cols: 3
+   dt: d
+   data: [ 886.86002710628088, 0., 660.01156072016204, 0.,
+       890.76973561887803, 391.02272136191584, 0., 0., 1. ]
+dist_coeffs: !!opencv-matrix
+   rows: 1
+   cols: 5
+   dt: d
+   data: [ 0.008998437543406743, -0.09800657363811878,
+       0.0080937898651397607, 0.0010042853211402725,
+       0.098112650395236062 ]
+reprojection_error: 0.28764108613349271
+image_width: 1280
+image_height: 720
+fisheye_model: !!opencv-matrix
+   rows: 4
+   cols: 1
+   dt: d
+   data: [ 0., 0., 0., 0. ]
+valid_frames: 20

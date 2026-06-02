@@ -1,0 +1,24 @@
+%YAML:1.0
+---
+camera_name: insta360_front
+camera_matrix: !!opencv-matrix
+   rows: 3
+   cols: 3
+   dt: d
+   data: [ 632.48882748166284, 0., 918.64149044877752, 0.,
+       632.61562012497905, 13.020528342469122, 0., 0., 1. ]
+dist_coeffs: !!opencv-matrix
+   rows: 4
+   cols: 1
+   dt: d
+   data: [ 0.078048928717605492, 0.020810406091882262,
+       -0.0092365073821087697, 0.0027480633558249691 ]
+reprojection_error: 0.84620902192271119
+image_width: 1920
+image_height: 540
+fisheye_model: !!opencv-matrix
+   rows: 4
+   cols: 1
+   dt: d
+   data: [ 1., 0., 0., 0. ]
+valid_frames: 30
