@@ -17,7 +17,9 @@ def generate_launch_description():
     # Topics are kept in config/topics.yaml for easy editing; we inline them
     # here because ros2 bag record does not accept a topics yaml directly.
     topics = [
-        '/lidar/points',
+        '/lidar_points',
+        '/livox/lidar',
+        '/livox/imu',
         '/oak4d/rgb/image_raw',
         '/oak4d/depth/image_raw',
         '/oak4d/rgb/camera_info',

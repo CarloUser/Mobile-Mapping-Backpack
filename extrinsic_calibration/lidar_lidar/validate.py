@@ -17,12 +17,20 @@ Usage:
       --config config.yaml
 """
 import argparse
+from pathlib import Path
 import numpy as np
 import yaml
 from scipy.spatial.transform import Rotation as R
 
 import handeye as he
 import io_utils as io
+
+
+def resolve_config_path(config_path, value):
+    path = Path(value)
+    if path.is_absolute():
+        return path
+    return (Path(config_path).resolve().parent / path).resolve()
 
 
 def x_diff(Xa, Xb):
@@ -41,10 +49,13 @@ def main():
     ap.add_argument("--plot", default="out/validation.png")
     args = ap.parse_args()
 
-    cfg = yaml.safe_load(open(args.config))
+    config_path = Path(args.config)
+    cfg = yaml.safe_load(open(config_path))
     stride = cfg["pairing"]["stride"]
     min_angle = cfg["pairing"]["min_angle_deg"]
-    cal_path = args.calibrated or cfg["paths"]["output_extrinsics"]
+    cal_path = Path(args.calibrated).resolve() if args.calibrated else resolve_config_path(
+        config_path, cfg["paths"]["output_extrinsics"]
+    )
 
     # X from the calibrated file: X = inv(base->hesai) @ (base->livox_calibrated).
     _, frames = io.load_extrinsics(cal_path)

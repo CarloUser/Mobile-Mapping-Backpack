@@ -11,6 +11,7 @@
 
   <exec_depend>ros2launch</exec_depend>
   <exec_depend>hesai_ros_driver</exec_depend>
+  <exec_depend>livox_ros2_avia</exec_depend>
   <exec_depend>depthai_ros_driver</exec_depend>
   <exec_depend>realsense2_camera</exec_depend>
   <exec_depend>xsens_mti_ros2_driver</exec_depend>

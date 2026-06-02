@@ -8,9 +8,9 @@ Two layers apply here:
 
 1. **System clock sync** (chrony/NTP) — keeps the Jetson's Linux clock aligned
    to UTC. Affects all sensors that stamp using `ros::Time::now()`.
-2. **LiDAR hardware sync** (PTP) — the HESAI JT128 has an internal clock that
-   can be disciplined via IEEE 1588 PTP, giving it sub-millisecond alignment
-   independent of the CPU.
+2. **LiDAR hardware sync** (PTP/GPS/PPS where supported) — the HESAI JT128 and
+   Livox Avia must be aligned closely enough for LiDAR-LiDAR calibration and
+   mapping. Use PTP where possible, and verify both point-cloud header stamps.
 
 ---
 
@@ -42,16 +42,19 @@ chronyc tracking
 
 ---
 
-## 2. HESAI JT128 PTP Synchronization
+## 2. LiDAR Time Synchronization
 
-The JT128 can act as a **PTP slave**, disciplining its internal clock to a
-PTP master on the network. The Jetson can serve as the master using `linuxptp`.
+The JT128 can act as a **PTP slave**, disciplining its internal clock to a PTP
+master on the network. The Jetson can serve as the master using `linuxptp`.
+Configure the Livox Avia with the best supported sync mode available in the
+driver/hardware setup, then verify its PointCloud2 header stamps against the
+same system time.
 
 ```bash
 sudo apt install -y linuxptp
 ```
 
-Identify the Ethernet interface connected to the LiDAR:
+Identify the Ethernet interface connected to the LiDAR network:
 ```bash
 ip link   # e.g., eth0 or enp3s0
 ```
@@ -68,12 +71,18 @@ Sync the system clock to PTP time:
 sudo phc2sys -a -rr -s CLOCK_REALTIME -m
 ```
 
-**Configure the LiDAR**: Open the JT128 web interface at `http://192.168.1.201`,
+**Configure the HESAI**: Open the JT128 web interface at `http://192.168.1.201`,
 navigate to **Network → PTP** and enable PTP slave mode. After ~30 seconds,
 the LiDAR's internal clock should track the Jetson's PTP master.
 
-**Verify** in the JT128 web UI: PTP status should show "Locked" or check the
-`lidar_points` PointCloud2 header timestamps against `ros2 topic echo /clock`.
+**Verify** in the JT128 web UI: PTP status should show "Locked". Then check both
+LiDAR PointCloud2 header timestamps:
+
+```bash
+ros2 topic echo /lidar_points --field header.stamp --once
+ros2 topic echo /livox/lidar --field header.stamp --once
+ros2 topic echo /livox/imu --field header.stamp --once
+```
 
 ---
 
@@ -96,6 +105,8 @@ With all sensors running:
 ```bash
 # Check timestamp spread across all sensor topics
 ros2 topic echo /lidar_points --field header.stamp --once
+ros2 topic echo /livox/lidar --field header.stamp --once
+ros2 topic echo /livox/imu --field header.stamp --once
 ros2 topic echo /imu/data --field header.stamp --once
 ros2 topic echo /oak4d/rgb/image_raw --field header.stamp --once
 ```

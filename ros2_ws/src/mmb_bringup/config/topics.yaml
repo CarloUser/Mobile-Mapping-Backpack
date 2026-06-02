@@ -3,8 +3,10 @@
 # Estimated aggregate bandwidth at full rate: ~1.5-2 GB/min.
 
 topics:
-  # LiDAR
-  - /lidar/points                         # PointCloud2, ~10 Hz, ~60 MB/min
+  # LiDARs
+  - /lidar_points                         # HESAI JT128 PointCloud2, ~10 Hz
+  - /livox/lidar                          # Livox Avia PointCloud2
+  - /livox/imu                            # Livox Avia IMU
 
   # OAK-4D Luxonis
   - /oak4d/rgb/image_raw                  # Image, 30 Hz

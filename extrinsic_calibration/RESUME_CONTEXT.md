@@ -36,10 +36,12 @@ Sensors in scope:
 
 - HESAI JT128 LiDAR
   - ROS frame: `lidar_hesai`
-  - Existing topic in repo: `/lidar/points`
+  - Confirmed PointCloud2 topic: `/lidar_points`
 - Livox Avia LiDAR
   - ROS frame added in initial extrinsics: `lidar_livox_avia`
-  - Driver/topic integration pending user/team push
+  - Confirmed PointCloud2 topic: `/livox/lidar`
+  - Confirmed IMU topic: `/livox/imu`
+  - Driver package/launch: `livox_ros2_avia`, `livox_lidar_launch.py`
 - OAK-4D Luxonis RGB-D + IMU
   - ROS frame: `camera_oak4d`
   - Existing topics: `/oak4d/rgb/image_raw`, `/oak4d/depth/image_raw`,
@@ -320,9 +322,10 @@ compiled extrinsic_calibration\scripts\validate_initial_extrinsics.py
    - camera info topic
    - frame_id
 4. Livox Avia ROS driver is now known to be `livox_ros2_avia`
-   (`livox_lidar_launch.py` for PointCloud2). Still confirm:
-   - actual `PointCloud2` topic name
-   - native Livox topic, if recorded
+   (`livox_lidar_launch.py` for PointCloud2). Confirmed topics:
+   - `/livox/lidar`
+   - `/livox/imu`
+   Still confirm:
    - frame_id
 5. Confirm whether camera CAD frames are body-style frames or optical frames.
    If they are body-style frames, add separate optical-frame transforms for
@@ -357,11 +360,13 @@ Then check topics and frame IDs:
 ```bash
 ros2 topic list
 ros2 topic echo /tf_static --once
-ros2 topic echo /lidar/points --once
+ros2 topic echo /lidar_points --once
+ros2 topic echo /livox/lidar --once
+ros2 topic echo /livox/imu --once
 ```
 
-When Livox and Insta360 drivers are integrated, also check their actual topics
-and message header frame IDs.
+Also check the Livox and Insta360 message header frame IDs on the real ROS
+machine.
 
 ## Recommended Calibration Sequence
 
@@ -391,8 +396,11 @@ After TF/topic sanity checks:
   explicitly asks; it is the SolidWorks source export.
 - Do not overwrite `extrinsics_initial.yaml` with calibrated values. Create a
   calibrated config instead.
-- Do not add Livox or Insta360 recorder topics until the actual driver topic
-  names are known.
+- HESAI recorder/calibration support uses the confirmed `/lidar_points` topic.
+- Livox recorder support uses the confirmed `/livox/lidar` and `/livox/imu`
+  topics.
+- Do not add Insta360 recorder topics until the actual driver topic names are
+  known.
 - The current repo has a dirty worktree from this calibration setup and the
   user's updated CAD YAML. Avoid reverting user edits.
 - Use `apply_patch` for manual edits.

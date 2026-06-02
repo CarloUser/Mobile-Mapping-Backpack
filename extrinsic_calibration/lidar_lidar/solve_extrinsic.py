@@ -16,12 +16,20 @@ Usage:
       --livox-traj out/livox_tum.txt --config config.yaml
 """
 import argparse
+from pathlib import Path
 import numpy as np
 import yaml
 from scipy.spatial.transform import Rotation as R
 
 import handeye as he
 import io_utils as io
+
+
+def resolve_config_path(config_path, value):
+    path = Path(value)
+    if path.is_absolute():
+        return path
+    return (Path(config_path).resolve().parent / path).resolve()
 
 
 def main():
@@ -33,12 +41,15 @@ def main():
     ap.add_argument("--out", help="Output calibrated YAML (default from config)")
     args = ap.parse_args()
 
-    cfg = yaml.safe_load(open(args.config))
+    config_path = Path(args.config)
+    cfg = yaml.safe_load(open(config_path))
     stride = cfg["pairing"]["stride"]
     min_angle = cfg["pairing"]["min_angle_deg"]
     min_obs = cfg["pairing"]["min_observability"]
-    init_path = cfg["paths"]["initial_extrinsics"]
-    out_path = args.out or cfg["paths"]["output_extrinsics"]
+    init_path = resolve_config_path(config_path, cfg["paths"]["initial_extrinsics"])
+    out_path = Path(args.out).resolve() if args.out else resolve_config_path(
+        config_path, cfg["paths"]["output_extrinsics"]
+    )
 
     # 1-2. Load + time-align (Livox interpolated onto Hesai stamps).
     th, WA = io.load_tum(args.hesai_traj)          # A = Hesai (reference)

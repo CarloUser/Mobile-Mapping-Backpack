@@ -18,9 +18,12 @@ convention: x-forward, y-left, z-up for body frames; ENU for world frames.
 ```
 base_link                    ← physical center of the backpack frame
 ├── lidar_hesai              ← HESAI JT128 optical center
+├── lidar_livox_avia         ← Livox Avia optical center
 ├── camera_oak4d             ← OAK-4D Luxonis left camera optical center
 ├── camera_oakd_lite         ← OAK-D Lite left camera optical center
+├── camera_oak1              ← OAK-1 camera optical center
 ├── camera_realsense         ← Intel RealSense color camera optical center
+├── camera_insta360          ← Insta360 camera frame
 ├── imu_xsens                ← Xsens MTi-610R measurement frame
 └── gnss_antenna             ← u-blox ANN-MB-00 antenna phase center
 ```
@@ -35,9 +38,12 @@ with the refined values in Week 2.
 | Sensor | `frame_id` |
 |--------|-----------|
 | HESAI JT128 | `lidar_hesai` |
+| Livox Avia | `lidar_livox_avia` |
 | OAK-4D (RGB) | `camera_oak4d` |
 | OAK-D Lite (RGB) | `camera_oakd_lite` |
+| OAK-1 | `camera_oak1` |
 | Intel RealSense (color) | `camera_realsense` |
+| Insta360 | `camera_insta360` |
 | Xsens MTi-610R | `imu_xsens` |
 | u-blox GNSS | `gnss_antenna` |
 
@@ -49,7 +55,9 @@ All sensor topics live under a sensor-specific namespace:
 
 | Topic | Message Type | Hz (approx) |
 |-------|-------------|-------------|
-| `/lidar/points` | `sensor_msgs/PointCloud2` | 10 |
+| `/lidar_points` | `sensor_msgs/PointCloud2` | 10 |
+| `/livox/lidar` | `sensor_msgs/PointCloud2` | driver-dependent |
+| `/livox/imu` | `sensor_msgs/Imu` | driver-dependent |
 | `/oak4d/rgb/image_raw` | `sensor_msgs/Image` | 30 |
 | `/oak4d/depth/image_raw` | `sensor_msgs/Image` | 30 |
 | `/oak4d/rgb/camera_info` | `sensor_msgs/CameraInfo` | 30 |
@@ -101,7 +109,7 @@ recording time.
 - [ ] Jetson booted, time sync confirmed (`chronyc tracking` shows < 2 ms offset)
 - [ ] All sensors powered and publishing (`ros2 topic list` shows all topics)
 - [ ] Storage has sufficient space (`df -h /data`)
-- [ ] Topic rates verified (`ros2 topic hz /lidar/points`, etc.)
+- [ ] Topic rates verified (`ros2 topic hz /lidar_points`, `ros2 topic hz /livox/lidar`, `ros2 topic hz /livox/imu`, etc.)
 - [ ] Insta360 internal recording started and timestamp noted
 
 ### 4.2 Start Recording
@@ -173,7 +181,7 @@ ros2 bag record -o /data/bags/mmb_20260505_1100_lab_static_imu \
 ### 5.4 Extrinsic Calibration (Student 4)
 
 - Print and mount **AprilTag board** (tagStandard41h12, 10 cm tags).
-- Record all cameras and LiDAR simultaneously viewing the board from multiple angles.
+- Record all cameras and both LiDARs simultaneously viewing the calibration scene from multiple angles.
 - Walk slowly around the board, pausing at each angle.
 
 ---
@@ -204,7 +212,9 @@ ros2 bag info /data/bags/<bag_name>
 
 # Spot-check topic rates in the bag
 ros2 bag play /data/bags/<bag_name> --clock &
-ros2 topic hz /lidar/points
+ros2 topic hz /lidar_points
+ros2 topic hz /livox/lidar
+ros2 topic hz /livox/imu
 ros2 topic hz /imu/data
 
 # Check for timestamp jumps or gaps (>100 ms gap on any topic is a problem)

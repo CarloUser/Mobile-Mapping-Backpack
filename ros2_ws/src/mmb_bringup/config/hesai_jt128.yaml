@@ -13,7 +13,7 @@ hesai_ros_driver_node:
     # 10 Hz is the default and a good starting point.
     rotation_speed: 600         # RPM; 600 = 10 Hz, 1200 = 20 Hz
 
-    # Point cloud topic remapped in launch file to /lidar/points
+    # Point cloud topic remapped in launch file to /lidar_points
     # Leave pcap_path empty for live sensor; set for bag-file replay
     pcap_path: ""
     correction_file_path: ""

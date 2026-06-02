@@ -58,7 +58,7 @@ well above 0.1. If it warns, your motion was too planar &mdash; recollect.
 
 - On the **rig/Jetson**: both LiDAR drivers running and publishing
   `sensor_msgs/PointCloud2` (Hesai `start.py`, Livox `livox_lidar_launch.py`).
-  Confirm the Livox topic name and set it in `config.yaml` (default `/livox/lidar`).
+  The confirmed topics are `/lidar_points` and `/livox/lidar`.
 - Time sync between the two LiDARs should be in place (see
   `docs/setup/03_time_sync.md`); the solver interpolates over small offsets but
   cannot fix large clock skew.
@@ -77,7 +77,7 @@ guidance above for 2-5 minutes in a feature-rich space (walls, furniture, corner
 &mdash; avoid wide-open fields and avoid moving people/vehicles in view).
 ```bash
 ros2 bag record -o lidar_calib_$(date +%Y%m%d_%H%M) \
-    /lidar/points /livox/lidar
+    /lidar_points /livox/lidar
 ```
 
 ### 2. Copy the bag to your PC

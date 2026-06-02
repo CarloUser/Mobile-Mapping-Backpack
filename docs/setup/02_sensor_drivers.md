@@ -33,6 +33,9 @@ ros2 topic hz /lidar_points
 # Should show ~10 Hz (default rotation rate)
 ```
 
+When launched through `mmb_bringup`, the HESAI cloud is published as
+`/lidar_points`.
+
 **Jetson Ethernet static IP setup**:
 ```bash
 # Replace eth0 with your actual interface name (check: ip link)
@@ -40,6 +43,36 @@ sudo nmcli con add type ethernet ifname eth0 con-name hesai-lidar \
   ip4 192.168.1.100/24
 sudo nmcli con up hesai-lidar
 ```
+
+---
+
+## Livox Avia LiDAR
+
+**Interface**: Ethernet (GbE). Configure the Livox network and broadcast code
+using the team scripts in `bash/setup_livox.sh` and
+`bash/setup_livox_config.sh`.
+
+```bash
+cd ~/ros2_ws/src
+git clone https://github.com/ASIG-X/livox_ros2_avia.git
+
+cd ~/ros2_ws
+rosdep install --from-paths src --ignore-src -r -y
+colcon build --symlink-install --packages-select livox_ros2_avia
+source install/setup.bash
+```
+
+**Verify** (LiDAR powered and connected):
+```bash
+ros2 launch livox_ros2_avia livox_lidar_launch.py
+# In another terminal:
+ros2 topic hz /livox/lidar
+ros2 topic hz /livox/imu
+```
+
+The confirmed Livox topics are `/livox/lidar` and `/livox/imu`. Confirm the
+message `header.frame_id` on the rig. The extrinsics config assumes the LiDAR
+frame is `lidar_livox_avia`.
 
 ---
 

@@ -3,8 +3,8 @@
 
 bag:
   # ROS 2 point cloud topics recorded on the rig (sensor_msgs/PointCloud2).
-  hesai_topic: /lidar/points        # Hesai JT128 (reference) - confirmed in repo topics.yaml
-  livox_topic: /livox/lidar         # Livox Avia - CONFIRM actual name from livox_lidar_launch.py
+  hesai_topic: /lidar_points        # HESAI JT128 (reference), confirmed on rig
+  livox_topic: /livox/lidar         # Livox Avia PointCloud2, confirmed on rig
 
 odometry:
   # KISS-ICP runs once per topic. These defaults suit indoor/handheld mapping.

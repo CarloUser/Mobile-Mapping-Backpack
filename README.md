@@ -9,12 +9,13 @@ offline calibration validation and trajectory evaluation.
 | Sensor | Type | Interface | ROS2 Driver |
 |--------|------|-----------|-------------|
 | HESAI JT128 | 128-beam LiDAR | GbE | `hesai_ros_driver` |
+| Livox Avia | solid-state LiDAR | GbE | `livox_ros2_avia` |
 | OAK-4D Luxonis | RGB-D + IMU | USB3 | `depthai_ros_driver` (v3) |
 | OAK-D Lite Luxonis | RGB-D | USB3 | `depthai_ros_driver` |
 | Intel RealSense D4xx | RGB-D | USB3 | `realsense2_camera` |
 | Xsens MTi-610R | IMU | USB/RS-422 | `xsens_mti_ros2_driver` |
 | u-blox + ANN-MB-00 | GNSS/RTK | USB/UART | `ublox_gps` |
-| Insta360 | 360° video | Internal SD | *(no ROS2 driver — sync post-hoc)* |
+| Insta360 | 360° video | USB/ROS | ROS driver available; confirm launch/topic names |
 
 ## Compute
 
@@ -42,6 +43,7 @@ ros2_ws/src/mmb_bringup/
     recording.launch.py     Starts rosbag2 with MCAP storage
   config/
     hesai_jt128.yaml        Hesai driver parameters
+    extrinsics_initial.yaml CAD-derived initial static transforms
     topics.yaml             Topic list for recording
 
 evaluation/
