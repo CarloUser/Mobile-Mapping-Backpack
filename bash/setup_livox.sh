@@ -6,6 +6,8 @@ echo "======================================"
 echo "Livox ROS2 Avia Setup"
 echo "======================================"
 
+WS= $WS
+
 # -----------------------------
 # STEP 1: Source ROS2
 # -----------------------------
@@ -17,8 +19,11 @@ source /opt/ros/humble/setup.bash
 # -----------------------------
 echo "[2/5] Creating livox workspace..."
 
-mkdir -p ~/livox_ws/src
-cd ~/livox_ws/src
+if [ ! -d $WS ]; then
+    mkdir -p $WS/src
+else
+    echo "WS already exists."
+cd $WS/src
 
 # -----------------------------
 # STEP 3: Clone repo
@@ -36,7 +41,7 @@ fi
 # -----------------------------
 echo "[4/5] Building workspace..."
 
-cd ~/livox_ws
+cd $WS
 
 rosdep install --from-paths src --ignore-src -r -y
 
@@ -53,7 +58,7 @@ echo ""
 echo "USAGE:"
 echo "--------------------------------------"
 echo "source /opt/ros/humble/setup.bash"
-echo "source ~/livox_ws/install/setup.bash"
+echo "source $WS/install/setup.bash"
 echo ""
 echo "Launch:"
 echo "ros2 launch livox_ros2_avia livox_lidar_launch.py"

@@ -7,7 +7,7 @@ echo "Insta360 ROS2 Driver Setup"
 echo "======================================"
 
 ROS_DISTRO=humble
-WS=~/insta360_ws
+WS=~/ros2_ws
 SDK_DIR=~/insta360_sdk   # where your SDK gets extracted
 
 # -----------------------------

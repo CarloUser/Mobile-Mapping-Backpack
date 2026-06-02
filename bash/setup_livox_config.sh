@@ -6,7 +6,7 @@ echo "======================================"
 echo "Livox CONFIG SETUP"
 echo "======================================"
 
-CONFIG_FILE=~/livox_ws/src/livox_ros2_avia/config/livox_lidar_config.json
+CONFIG_FILE=~/ros2_ws/src/livox_ros2_avia/config/livox_lidar_config.json
 
 # -----------------------------
 # CHECK FILE
@@ -45,5 +45,5 @@ echo ""
 echo "Next steps:"
 echo "--------------------------------------"
 echo "source /opt/ros/humble/setup.bash"
-echo "source ~/livox_ws/install/setup.bash"
+echo "source ~/ros2_ws/install/setup.bash"
 echo "ros2 launch livox_ros2_avia livox_lidar_launch.py"

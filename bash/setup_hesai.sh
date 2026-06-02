@@ -7,7 +7,7 @@ echo "Hesai ROS2 Driver Setup (JT128)"
 echo "======================================"
 
 ROS_DISTRO=humble
-WS=~/hesai_ws
+WS=~/ros2_ws
 
 # -----------------------------
 # STEP 1: Source ROS
@@ -29,8 +29,10 @@ sudo apt-get install -y \
 # STEP 3: Create workspace
 # -----------------------------
 echo "[3/6] Creating workspace..."
-
-mkdir -p $WS/src
+if [ ! -d $WS ]; then
+    mkdir -p $WS/src
+else
+    echo "WS already exists."
 cd $WS/src
 
 # -----------------------------

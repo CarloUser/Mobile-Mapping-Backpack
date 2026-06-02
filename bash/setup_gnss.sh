@@ -7,7 +7,7 @@ echo "GNSS (u-blox ZED-F9P) ROS2 Setup"
 echo "======================================"
 
 ROS_DISTRO=humble
-WS=~/gnss_ws
+WS=~/ros2_ws
 
 # -----------------------------
 # STEP 1: Source ROS
@@ -66,7 +66,7 @@ echo "GNSS (u-blox ZED-F9P) ROS2 Setup"
 echo "======================================"
 
 ROS_DISTRO=humble
-WS=~/gnss_ws
+WS=~/ros2_ws
 
 # -----------------------------
 # STEP 1: Source ROS
@@ -79,7 +79,10 @@ source /opt/ros/$ROS_DISTRO/setup.bash
 # -----------------------------
 echo "[2/6] Creating workspace..."
 
-mkdir -p $WS/src
+if [ ! -d $WS ]; then
+    mkdir -p $WS/src
+else
+    echo "WS already exists."
 cd $WS/src
 
 # -----------------------------
@@ -118,7 +121,7 @@ echo "[5/6] Building..."
 
 colcon build --symlink-install --parallel-workers 2
 
-source ~/gnss_ws/install/setup.bash
+source ~/ros2_ws/install/setup.bash
 
 # -----------------------------
 # STEP 6: Done
