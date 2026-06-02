@@ -8,7 +8,8 @@ echo "======================================"
 
 ROS_DISTRO=humble
 WS=~/ros2_ws
-SDK_DIR=~/insta360_sdk   # where your SDK gets extracted
+SDK_DIR=~/
+   # where your SDK gets extracted
 
 # -----------------------------
 # STEP 1: Source ROS

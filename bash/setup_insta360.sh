@@ -21,11 +21,13 @@ source /opt/ros/$ROS_DISTRO/setup.bash
 # -----------------------------
 echo "[2/6] Creating workspace..."
 
-if [ ! -d $WS ]; then
-    mkdir -p $WS/src
+if [ ! -d "$WS" ]; then
+    mkdir -p "$WS/src"
 else
     echo "WS already exists."
-cd $WS/src
+fi
+
+cd "$WS/src"
 
 # -----------------------------
 # STEP 3: Clone driver
