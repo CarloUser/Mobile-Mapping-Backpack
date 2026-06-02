@@ -89,7 +89,7 @@ sudo udevadm control --reload-rules && sudo udevadm trigger
 ```
 
 ```bash
-# ROS2 package (apt — prebuilt for Humble)
+# ROS2 package (apt - prebuilt for Humble)
 sudo apt install -y ros-humble-depthai-ros
 
 # If apt package is outdated, build from source instead:
@@ -98,7 +98,7 @@ sudo apt install -y ros-humble-depthai-ros
 # cd ~/ros2_ws && colcon build --symlink-install --packages-select depthai_ros_driver
 ```
 
-**Verify** (camera plugged in via USB3 — use the USB3 port, not USB2):
+**Verify** (camera plugged in via USB3 - use the USB3 port, not USB2):
 ```bash
 # OAK-D Lite
 ros2 launch depthai_ros_driver camera.launch.py camera_model:=OAK-D-LITE
@@ -110,7 +110,7 @@ ros2 launch depthai_ros_driver camera.launch.py camera_model:=OAK-4
 
 **Note**: If running both OAK cameras simultaneously, each needs a separate
 USB3 port (or a powered USB3 hub). They must be launched with different
-namespaces — see `cameras.launch.py`.
+namespaces - see `cameras.launch.py`.
 
 ---
 
@@ -171,7 +171,7 @@ ros2 topic hz /imu/data    # should be 400 Hz for MTi-610R
 
 ## u-blox GNSS (with ANN-MB-00 Antenna)
 
-The ANN-MB-00 is a multi-band antenna — it connects to a u-blox receiver
+The ANN-MB-00 is a multi-band antenna - it connects to a u-blox receiver
 (e.g., ZED-F9P evaluation board or equivalent). Confirm what receiver board
 you have; the antenna alone does not connect to USB.
 
@@ -198,17 +198,31 @@ ros2 topic echo /fix     # NavSatFix messages once outdoors with sky view
 
 ---
 
-## Insta360 (360° Camera)
+## Insta360 (360-degree Camera)
 
-There is no ROS2 driver for the Insta360. Use this workflow instead:
+The Insta360 is in scope and has a ROS driver, but the exact package, launch
+file, image topics, camera info topic, and `header.frame_id` still need to be
+confirmed on the rig before adding it to `recording.launch.py`.
 
-1. **Record internally** to the Insta360's SD card during each run.
-2. **Sync timestamps** post-hoc using the GPS track in the rosbag to align
-   the Insta360 footage via GPS-embedded metadata or a visible event
-   (e.g., a flash LED triggered at recording start).
-3. Export frames with `ffmpeg` if needed for offline processing.
+**Verify once the driver is installed**:
 
-No driver installation required.
+```bash
+ros2 topic list | grep -i insta
+ros2 topic info <insta360_image_topic>
+ros2 topic echo <insta360_image_topic> --once
+```
+
+The static extrinsics config already includes `base_link -> camera_insta360`.
+If the driver publishes a different frame ID, either configure the driver to use
+`camera_insta360` or add a documented bridge transform.
+
+Fallback workflow if the ROS driver is not ready for a run:
+
+1. Record internally to the Insta360's SD card.
+2. Note the start time and create a visible sync event, such as an LED flash.
+3. Align the footage to the rosbag offline using the run log, GPS timing, or the
+   visible sync event.
+4. Export frames with `ffmpeg` if needed for offline processing.
 
 ---
 
@@ -232,5 +246,5 @@ echo "source ~/ros2_ws/install/setup.bash" >> ~/.bashrc
 
 ## Next Step
 
-→ [03_time_sync.md](03_time_sync.md) — configure time synchronization before
+Next: [03_time_sync.md](03_time_sync.md) - configure time synchronization before
 doing any multi-sensor recording.

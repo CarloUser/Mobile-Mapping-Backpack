@@ -12,9 +12,29 @@ SolidWorks. All initial static transforms are expressed as `base_link -> sensor`
 
 1. Confirm `Oak_4_light` in the SolidWorks export is the OAK-D Lite.
 2. Confirm the Insta360 ROS driver publishes a frame compatible with `camera_insta360`.
-3. Add Livox Avia and Insta360 topics to the recorder after their launch files
-   and topic names are committed.
-4. Run `scripts/validate_initial_extrinsics.py` after every CAD export update.
+3. Confirm OAK-1 is physically mounted and decide whether it needs ROS bringup
+   and recording support.
+4. Add Insta360 recorder topics after the actual ROS driver topics are known.
+5. Run the readiness checks after every CAD export or topic update.
+
+## Readiness Check
+
+From the repository root:
+
+```bash
+python extrinsic_calibration/scripts/check_calibration_readiness.py
+```
+
+On the PC that will run LiDAR-LiDAR calibration, install dependencies first and
+then run the strict dependency check:
+
+```bash
+pip install -r extrinsic_calibration/lidar_lidar/requirements.txt
+python extrinsic_calibration/scripts/check_calibration_readiness.py --strict-deps
+```
+
+The non-strict check is expected to pass on development machines even when
+KISS-ICP/scipy/matplotlib are not installed yet; it will warn about those.
 
 ## Calibration Order
 

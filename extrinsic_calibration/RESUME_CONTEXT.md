@@ -1,6 +1,7 @@
 # Resume Context: Mobile Mapping Backpack Extrinsic Calibration
 
-Last updated: 2026-06-02 (sensor driver setup scripts now merged from `mazi`)
+Last updated: 2026-06-02 (main branch created; `mazi` merged; old `claude/...`
+branch deleted)
 
 This file is a handoff summary for resuming work on the mobile mapping backpack
 extrinsic calibration setup.
@@ -26,7 +27,7 @@ relative to a stable `base_link`.
 - Blickfeld LiDAR is not used.
 - Livox Avia LiDAR is used and interfaces over GbE.
 - Insta360 is used and has a ROS driver.
-- Livox drivers are expected to be pushed/added soon.
+- Livox drivers/setup scripts are now merged from `mazi`.
 - Current CAD transforms are only initial estimates. Final calibrated values
   should be saved separately, not by overwriting the CAD initial estimate file.
 
@@ -183,17 +184,14 @@ Modified:
 - `ros2_ws/src/mmb_bringup/package.xml`
   - Added runtime dependency `python3-yaml`.
 
-These changes are now committed and pushed to
-`origin/claude/plan-backpack-project-U5DX0`
-(commit "Add initial extrinsic calibration setup ...").
+These changes are now committed and included on `origin/main`.
 
 ## Driver Integration Status (updated 2026-06-02)
 
-The sensor driver/setup scripts were merged from branch `mazi` into
-`claude/plan-backpack-project-U5DX0`. They live in a new top-level `bash/`
-folder (see `bash/README.md` and `bash/launch_commands.md`). The merge was
-conflict-free; the driver scripts and the extrinsic-calibration files do not
-overlap.
+The sensor driver/setup scripts were merged from branch `mazi` into `main`.
+They live in a top-level `bash/` folder (see `bash/README.md` and
+`bash/launch_commands.md`). The merge was conflict-free; the driver scripts and
+the extrinsic-calibration files do not overlap.
 
 Driver ROS packages and launch entry points are now known (from
 `bash/launch_commands.md`):
@@ -222,8 +220,8 @@ Still UNCONFIRMED after the merge (verify on the real ROS machine):
 - Insta360 launch file, image/camera_info topics, and `frame_id`.
 - OAK-1 driver/launch (section is empty) and whether it is mounted at all.
 
-Important: at the time the calibration files were first created, these changes
-were not committed. They are now committed and pushed.
+Important: these calibration and driver integration changes are now committed
+and pushed on `main`.
 
 ## Static TF Launch Behavior
 
@@ -310,6 +308,46 @@ compiled ros2_ws\src\mmb_bringup\launch\all_sensors.launch.py
 compiled ros2_ws\src\mmb_bringup\launch\static_extrinsics.launch.py
 compiled extrinsic_calibration\scripts\validate_initial_extrinsics.py
 ```
+
+## Readiness Check Script
+
+Created:
+
+`extrinsic_calibration/scripts/check_calibration_readiness.py`
+
+Recommended command from the repo root:
+
+```powershell
+python extrinsic_calibration\scripts\check_calibration_readiness.py
+```
+
+It checks:
+
+- required CAD/static TF frames are present
+- confirmed Hesai/Livox topics are in the recorder config
+- LiDAR-LiDAR solver config uses `/lidar_points` and `/livox/lidar`
+- initial extrinsics path resolves
+- `mmb_bringup` installs launch/config files
+- Python launch/calibration scripts compile
+- PC-side LiDAR-LiDAR dependencies are available, or warns if not installed
+
+On the PC that will run LiDAR-LiDAR odometry, install dependencies and use:
+
+```powershell
+pip install -r extrinsic_calibration\lidar_lidar\requirements.txt
+python extrinsic_calibration\scripts\check_calibration_readiness.py --strict-deps
+```
+
+Last local non-strict result on this Windows development machine:
+
+```text
+Readiness check passed with 1 warning(s).
+```
+
+The warning is expected here because this local Python environment is missing
+`scipy`, `matplotlib`, and the `kiss_icp_pipeline` CLI. Install
+`extrinsic_calibration/lidar_lidar/requirements.txt` on the calibration PC
+before running `run_odometry.py`.
 
 ## Known Open Questions
 
@@ -401,7 +439,8 @@ After TF/topic sanity checks:
   topics.
 - Do not add Insta360 recorder topics until the actual driver topic names are
   known.
-- The current repo has a dirty worktree from this calibration setup and the
-  user's updated CAD YAML. Avoid reverting user edits.
+- The central working branch is `main`; the old
+  `claude/plan-backpack-project-U5DX0` branch was deleted after its changes were
+  confirmed to be contained in `main`.
 - Use `apply_patch` for manual edits.
 - Use PowerShell-compatible commands on this machine.

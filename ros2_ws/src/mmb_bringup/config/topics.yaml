@@ -32,7 +32,7 @@ topics:
   - /gnss/fix                             # NavSatFix, 5-10 Hz
   - /gnss/fix_velocity                    # TwistWithCovarianceStamped, 5-10 Hz
 
-  # TF tree — essential for extrinsic calibration replay
+  # TF tree - essential for extrinsic calibration replay
   - /tf
   - /tf_static
 

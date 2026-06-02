@@ -13,7 +13,7 @@ def generate_launch_description():
                     ' Use format: /data/bags/mmb_YYYYMMDD_HHMM_<location>_<run_type>_<run_number>',
     )
 
-    # Load topic list from config — passed directly as CLI args
+    # Load topic list from config - passed directly as CLI args
     # Topics are kept in config/topics.yaml for easy editing; we inline them
     # here because ros2 bag record does not accept a topics yaml directly.
     topics = [
