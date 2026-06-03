@@ -10,7 +10,7 @@ echo "======================================"
 # CONFIG
 # -----------------------------
 DOWNLOAD_DIR=~/Downloads
-ZIP_NAME="insta360_sdk.zip"   # change if needed
+ZIP_NAME="Linux_CameraSDK-2.1.1_MediaSDK-3.1.1.zip"   # change if needed
 INSTALL_DIR=~/insta360_sdk
 ZIP_PATH="$DOWNLOAD_DIR/$ZIP_NAME"
 
