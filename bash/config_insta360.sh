@@ -6,12 +6,22 @@ echo "======================================"
 echo "Insta360 CONFIG SETUP"
 echo "======================================"
 
-WS=~/ros2_ws
-SDK_DIR=~/insta360_sdk
-DRIVER_DIR=$WS/src/insta360_ros_driver
+# -----------------------------
+# CONFIG
+# -----------------------------
+WS="$HOME/ros2_ws"
 
-INCLUDE_DIR=$DRIVER_DIR/include
-LIB_DIR=$DRIVER_DIR/lib
+DRIVER_DIR="$WS/src/insta360_ros_driver"
+INCLUDE_DIR="$DRIVER_DIR/include"
+LIB_DIR="$DRIVER_DIR/lib"
+
+INSTALL_DIR="$HOME/insta360_sdk"
+SDK_ROOT="$INSTALL_DIR/Linux_CameraSDK-2.1.1_MediaSDK-3.1.1"
+
+JETSON_SDK_DIR="$SDK_ROOT/CameraSDK-20251105_112855-2.1.1-jetson-linux-9.3.0-2020.08-x86_64_aarch64_linux-gnu"
+
+SDK_INCLUDE_DIR="$JETSON_SDK_DIR/include"
+SDK_LIB_PATH="$JETSON_SDK_DIR/lib/libCameraSDK.so"
 
 # -----------------------------
 # CHECKS
@@ -21,8 +31,13 @@ if [ ! -d "$DRIVER_DIR" ]; then
     exit 1
 fi
 
-if [ ! -d "$SDK_DIR" ]; then
-    echo "ERROR: SDK folder not found: $SDK_DIR"
+if [ ! -d "$SDK_INCLUDE_DIR" ]; then
+    echo "ERROR: SDK include folder not found: $SDK_INCLUDE_DIR"
+    exit 1
+fi
+
+if [ ! -f "$SDK_LIB_PATH" ]; then
+    echo "ERROR: libCameraSDK.so not found: $SDK_LIB_PATH"
     exit 1
 fi
 
@@ -30,35 +45,23 @@ mkdir -p "$INCLUDE_DIR"
 mkdir -p "$LIB_DIR"
 
 # -----------------------------
-# FIND SDK FILES
+# STEP 1: COPY SDK FILES
 # -----------------------------
-echo "[1/4] Searching SDK files..."
+echo "[1/4] Copying SDK headers and library..."
 
-CAMERA_HEADERS=$(find "$SDK_DIR" -type f \( -iname "*camera*.h" -o -iname "*Camera*.h" \))
-STREAM_HEADERS=$(find "$SDK_DIR" -type f \( -iname "*stream*.h" -o -iname "*Stream*.h" \))
-SDK_LIB=$(find "$SDK_DIR" -type f -name "libCameraSDK.so" | head -n 1)
+cp -r "$SDK_INCLUDE_DIR/"* "$INCLUDE_DIR/"
+cp "$SDK_LIB_PATH" "$LIB_DIR/"
 
-if [ -z "$SDK_LIB" ]; then
-    echo "ERROR: libCameraSDK.so not found in $SDK_DIR"
-    exit 1
-fi
+echo "Copied include from:"
+echo "$SDK_INCLUDE_DIR"
 
-# -----------------------------
-# COPY FILES
-# -----------------------------
-echo "[2/4] Copying headers and library..."
-
-cp $CAMERA_HEADERS "$INCLUDE_DIR/" 2>/dev/null || true
-cp $STREAM_HEADERS "$INCLUDE_DIR/" 2>/dev/null || true
-cp "$SDK_LIB" "$LIB_DIR/"
-
-echo "Copied SDK library:"
-echo "$SDK_LIB"
+echo "Copied library:"
+echo "$SDK_LIB_PATH"
 
 # -----------------------------
-# UDEV RULE
+# STEP 2: UDEV RULE
 # -----------------------------
-echo "[3/4] Setting up udev rule..."
+echo "[2/4] Setting up udev rule..."
 
 echo 'SUBSYSTEM=="usb", ATTR{manufacturer}=="Arashi Vision", SYMLINK+="insta", MODE="0777"' | \
 sudo tee /etc/udev/rules.d/99-insta.rules > /dev/null
@@ -66,7 +69,6 @@ sudo tee /etc/udev/rules.d/99-insta.rules > /dev/null
 sudo udevadm control --reload-rules
 sudo udevadm trigger
 
-# chmod only if device exists
 if [ -e /dev/insta ]; then
     sudo chmod 777 /dev/insta
 else
@@ -74,16 +76,23 @@ else
 fi
 
 # -----------------------------
-# BUILD INSTA360 ONLY
+# STEP 3: BUILD INSTA360 ONLY
 # -----------------------------
-echo "[4/4] Building Insta360 package..."
+echo "[3/4] Building Insta360 package..."
 
 cd "$WS"
+
+source /opt/ros/humble/setup.bash
 
 colcon build \
   --packages-select insta360_ros_driver \
   --symlink-install \
   --parallel-workers 1
+
+# -----------------------------
+# STEP 4: DONE
+# -----------------------------
+echo "[4/4] DONE"
 
 echo "======================================"
 echo "Insta360 CONFIG COMPLETE"
