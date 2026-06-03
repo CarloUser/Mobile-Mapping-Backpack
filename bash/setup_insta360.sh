@@ -7,90 +7,57 @@ echo "Insta360 ROS Driver Setup (NO SDK)"
 echo "======================================"
 
 ROS_DISTRO=humble
-WS=~/ros2_ws
+WS="$HOME/ros2_ws"
 
 # -----------------------------
 # STEP 1: Source ROS2
 # -----------------------------
-echo "[1/6] Sourcing ROS2..."
+echo "[1/5] Sourcing ROS2..."
 
-source /opt/ros/$ROS_DISTRO/setup.bash
+source "/opt/ros/$ROS_DISTRO/setup.bash"
 
 # -----------------------------
 # STEP 2: Create workspace
 # -----------------------------
-echo "[2/6] Creating workspace..."
+echo "[2/5] Creating workspace..."
 
-if [ ! -d $WS ]; then
-    mkdir -p $WS/src
-else
-    echo "WS already exists."
-fi
-cd $WS/src
+mkdir -p "$WS/src"
+cd "$WS/src"
 
 # -----------------------------
 # STEP 3: Clone driver
 # -----------------------------
-echo "[3/6] Cloning driver..."
+echo "[3/5] Cloning driver..."
 
 if [ ! -d "insta360_ros_driver" ]; then
     git clone -b humble https://github.com/ai4ce/insta360_ros_driver
 else
-    echo "✔ Driver already exists"
+    echo "Driver already exists."
 fi
 
 # -----------------------------
 # STEP 4: Install ROS deps
 # -----------------------------
-echo "[4/6] Installing dependencies..."
+echo "[4/5] Installing dependencies..."
 
-cd $WS
+cd "$WS"
 
 sudo apt-get update
 rosdep install --from-paths src --ignore-src -r -y
 
 # -----------------------------
-# STEP 5: Build
+# STEP 5: Done
 # -----------------------------
-echo "[5/6] Building..."
+echo "[5/5] Driver repo ready."
 
-colcon build --symlink-install
-
-# -----------------------------
-# STEP 6: Setup udev (USB access)
-# -----------------------------
-echo "[6/6] Setting up udev rule..."
-
-echo 'SUBSYSTEM=="usb", ATTR{manufacturer}=="Arashi Vision", SYMLINK+="insta", MODE="0777"' | \
-sudo tee /etc/udev/rules.d/99-insta.rules > /dev/null
-
-sudo udevadm control --reload-rules
-sudo udevadm trigger
-
-echo "✔ udev rule created → /dev/insta"
-
-# -----------------------------
-# DONE
-# -----------------------------
 echo "======================================"
 echo "Insta360 ROS setup COMPLETE"
 echo "======================================"
 
 echo ""
-echo "IMPORTANT:"
+echo "Next:"
 echo "--------------------------------------"
-echo "1. Copy SDK files manually:"
-echo "   → headers → include/"
-echo "   → libCameraSDK.so → lib/"
+echo "1. Run setup_insta360_sdk.sh"
+echo "2. Run config_insta360.sh"
 echo ""
-echo "2. Set camera:"
-echo "   → Dual-lens mode"
-echo "   → USB mode = Android"
-echo ""
-echo "3. Replug camera"
-echo ""
-
-echo "Run:"
-echo "--------------------------------------"
-echo "source /opt/ros/$ROS_DISTRO/setup.bash"
-echo "source $WS/install/setup.bash"
+echo "Build happens in config_insta360.sh after SDK files are copied."
