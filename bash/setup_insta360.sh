@@ -43,7 +43,12 @@ echo "[4/5] Installing dependencies..."
 cd "$WS"
 
 sudo apt-get update
-rosdep install --from-paths src --ignore-src -r -y
+cd ~/ros2_ws
+
+rosdep install \
+  --from-paths src/insta360_ros_driver \
+  --ignore-src \
+  -r -y
 
 # -----------------------------
 # STEP 5: Done

@@ -49,7 +49,8 @@ mkdir -p "$LIB_DIR"
 # -----------------------------
 echo "[1/4] Copying SDK headers and library..."
 
-cp -r "$SDK_INCLUDE_DIR/"* "$INCLUDE_DIR/"
+cp -r "$SDK_INCLUDE_DIR/camera" "$INCLUDE_DIR/"
+cp -r "$SDK_INCLUDE_DIR/stream" "$INCLUDE_DIR/"
 cp "$SDK_LIB_PATH" "$LIB_DIR/"
 
 echo "Copied include from:"
