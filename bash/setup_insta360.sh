@@ -25,6 +25,7 @@ if [ ! -d $WS ]; then
     mkdir -p $WS/src
 else
     echo "WS already exists."
+fi
 cd $WS/src
 
 # -----------------------------

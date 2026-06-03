@@ -32,7 +32,11 @@ sudo apt-get install -y \
 # -----------------------------
 echo "[3/7] Creating workspace..."
 
-mkdir -p $WS/src
+if [ ! -d $WS ]; then
+    mkdir -p $WS/src
+else
+    echo "WS already exists."
+fi
 cd $WS/src
 
 # -----------------------------

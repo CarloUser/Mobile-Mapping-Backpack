@@ -19,7 +19,12 @@ source /opt/ros/humble/setup.bash
 # -----------------------------
 echo "[2/5] Creating workspace..."
 
-mkdir -p "$WS/src"
+if [ ! -d $WS ]; then
+    mkdir -p $WS/src
+else
+    echo "WS already exists."
+fi
+
 cd "$WS/src"
 
 # -----------------------------
