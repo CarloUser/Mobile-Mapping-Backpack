@@ -47,7 +47,7 @@ mkdir -p "$LIB_DIR"
 # -----------------------------
 # STEP 1: COPY SDK FILES
 # -----------------------------
-echo "[1/4] Copying SDK headers and library..."
+echo "[1/5] Copying SDK headers and library..."
 
 cp -r "$SDK_INCLUDE_DIR/camera" "$INCLUDE_DIR/"
 cp -r "$SDK_INCLUDE_DIR/stream" "$INCLUDE_DIR/"
@@ -62,7 +62,7 @@ echo "$SDK_LIB_PATH"
 # -----------------------------
 # STEP 2: UDEV RULE
 # -----------------------------
-echo "[2/4] Setting up udev rule..."
+echo "[2/5] Setting up udev rule..."
 
 echo 'SUBSYSTEM=="usb", ATTR{manufacturer}=="Arashi Vision", SYMLINK+="insta", MODE="0777"' | \
 sudo tee /etc/udev/rules.d/99-insta.rules > /dev/null
@@ -77,9 +77,26 @@ else
 fi
 
 # -----------------------------
+# FIX JETSON OPENCV
+# -----------------------------
+echo "[3/5] Fixing OpenCV symlinks..."
+
+for f in /usr/lib/aarch64-linux-gnu/libopencv_*.so.4.5d; do
+    [ -e "$f" ] || continue
+
+    base=$(basename "$f" .so.4.5d)
+
+    if [ ! -e "/usr/lib/${base}.so.4.8.0" ]; then
+        sudo ln -s "$f" "/usr/lib/${base}.so.4.8.0"
+    fi
+done
+
+sudo ldconfig
+
+# -----------------------------
 # STEP 3: BUILD INSTA360 ONLY
 # -----------------------------
-echo "[3/4] Building Insta360 package..."
+echo "[4/5] Building Insta360 package..."
 
 cd "$WS"
 
@@ -93,7 +110,7 @@ colcon build \
 # -----------------------------
 # STEP 4: DONE
 # -----------------------------
-echo "[4/4] DONE"
+echo "[5/5] DONE"
 
 echo "======================================"
 echo "Insta360 CONFIG COMPLETE"
