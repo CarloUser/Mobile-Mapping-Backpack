@@ -45,9 +45,6 @@ sudo apt-get install -y \
 echo "[4/4] Installing RealSense..."
 
 sudo apt-get install -y \
-    librealsense2-dkms \
-    librealsense2-utils \
-    librealsense2-dev \
     ros-$ROS_DISTRO-realsense2-camera \
     ros-$ROS_DISTRO-realsense2-description
 
