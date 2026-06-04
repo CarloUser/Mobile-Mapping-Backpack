@@ -108,6 +108,16 @@ ros2 run depthai_ros_driver_v3 driver_node
 ros2 run realsense_ros2_camera realsense_ros2_camera
 ```
 
+```
+ros2 launch realsense2_camera rs_launch.py
+```
+
+# Insta360
+
+```
+ros2 launch insta360_ros_driver bringup.launch.xml
+```
+
 # Xsens IMU
 
 open first terminal:
@@ -133,6 +143,3 @@ ros2 launch ntrip ntrip_launch.py
 ```
 ros2 launch ublox_gps ublox_gps_node-launch.py
 ```
-
-# 
-
