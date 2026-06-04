@@ -51,6 +51,36 @@ rosdep install \
   -r -y
 
 # -----------------------------
+# STEP X: Fix Jetson OpenCV
+# -----------------------------
+echo "Fixing Jetson OpenCV..."
+
+sudo apt-get update
+
+# Remove Ubuntu/mixed OpenCV packages
+sudo apt-get remove -y 'libopencv*' python3-opencv || true
+sudo apt-get autoremove -y || true
+
+# Remove leftover broken CMake/OpenCV files
+sudo rm -rf /usr/lib/cmake/opencv4
+sudo rm -f /usr/lib/libopencv_*
+sudo ldconfig
+
+# Install NVIDIA Jetson OpenCV packages
+sudo apt-get install -y \
+    nvidia-opencv \
+    nvidia-opencv-dev
+
+# Reinstall ROS deps that may have been removed
+sudo apt-get install -y \
+    ros-humble-cv-bridge \
+    ros-humble-camera-info-manager \
+    ros-humble-image-transport \
+    ros-humble-std-srvs
+
+sudo ldconfig
+
+# -----------------------------
 # STEP 5: Done
 # -----------------------------
 echo "[5/5] Driver repo ready."
