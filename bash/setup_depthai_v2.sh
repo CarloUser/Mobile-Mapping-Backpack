@@ -1,83 +1,69 @@
 #!/bin/bash
-
 set -e
 
-echo "======================================"
-echo "DepthAI ROS v2 (Inside ros_ws - FINAL FIXED)"
-echo "======================================"
+echo "=============================="
+echo "DepthAI ROS2 v2 Setup Script"
+echo "=============================="
 
-# -----------------------------
-# STEP 1: Source ROS2
-# -----------------------------
-echo "[1/6] Sourcing ROS2..."
-source /opt/ros/humble/setup.bash
+ROS_DISTRO=humble
+WS="$HOME/depthai_v2_ws"
 
-# -----------------------------
-# STEP 2: Go to workspace
-# -----------------------------
-echo "[2/6] Using existing workspace ~/ros_ws..."
-cd ~/ros_ws/src
+echo "[1/7] Source ROS..."
+source /opt/ros/$ROS_DISTRO/setup.bash
 
-# -----------------------------
-# STEP 3: Clone depthai-ros (v2)
-# -----------------------------
-echo "[3/6] Cloning depthai-ros (v2)..."
-if [ ! -d "depthai-ros" ]; then
-    git clone --branch humble https://github.com/luxonis/depthai-ros.git
-else
-    echo "depthai-ros already exists, skipping clone"
-fi
-
-# -----------------------------
-# STEP 4: Clone depthai-core WITH submodules (CRITICAL)
-# -----------------------------
-echo "[4/6] Cloning depthai-core (with submodules)..."
-if [ ! -d "depthai-core" ]; then
-    git clone --recurse-submodules https://github.com/luxonis/depthai-core.git
-else
-    echo "depthai-core already exists, updating submodules..."
-    cd depthai-core
-    git submodule update --init --recursive
-    cd ..
-fi
-
-# -----------------------------
-# STEP 5: Install dependencies
-# -----------------------------
-
-echo "[5/6] Installing tracked DepthAI system dependencies..."
-
+echo "[2/7] Install dependencies..."
 sudo apt update
-sudo apt install -y $(cat deps_depthai.txt)
+sudo apt install -y \
+  git cmake build-essential python3-rosdep \
+  libopencv-dev libpcl-dev libusb-1.0-0-dev
 
-echo "[5/6] Installing dependencies (rosdep)..."
+echo "[3/7] Create workspace..."
+mkdir -p "$WS/src"
+cd "$WS/src"
 
-cd ~/ros_ws
+echo "[4/7] Clone repositories..."
+if [ ! -d depthai-ros ]; then
+  git clone -b humble https://github.com/luxonis/depthai-ros.git
+fi
 
-rosdep install --from-paths src --ignore-src -r -y \
-  --skip-keys="depthai"
+if [ ! -d depthai-core ]; then
+  git clone -b v2_stable https://github.com/luxonis/depthai-core.git
+fi
 
-# -----------------------------
-# STEP 6: Build workspace
-# -----------------------------
+echo "[5/7] Build depthai-core v2..."
+cd "$WS/src/depthai-core"
+git submodule update --init --recursive
 
-echo "[6/6] Building workspace (this will take time)..."
+rm -rf build
+mkdir build
+cd build
 
-MAKEFLAGS="-j4 -l4" colcon build \
-  --cmake-args \
-    -DCMAKE_BUILD_TYPE=Release \
-    -DVCPKG_FEATURE_FLAGS=manifests
-echo "======================================"
-echo "DepthAI v2 setup COMPLETE"
-echo "======================================"
+cmake .. \
+  -DCMAKE_BUILD_TYPE=Release \
+  -DBUILD_SHARED_LIBS=ON
 
-echo ""
-echo "IMPORTANT USAGE:"
-echo "--------------------------------------"
-echo "Default terminal → uses v3 (APT)"
-echo ""
-echo "To use v2:"
-echo "  source ~/ros_ws/install/setup.bash"
-echo ""
-echo "WARNING:"
-echo "Do NOT add ros_ws to ~/.bashrc!"
+make -j$(nproc)
+
+make install DESTDIR="$WS/depthai_install"
+
+DEPTHAI_DIR="$WS/depthai_install$WS/src/depthai-core/build/install/lib/cmake/depthai"
+
+echo "[6/7] Install ROS deps..."
+cd "$WS"
+rosdep update
+rosdep install --from-paths src --ignore-src -r -y
+
+echo "[7/7] Build depthai-ros v2..."
+rm -rf build install log
+
+colcon build \
+  --symlink-install \
+  --parallel-workers 1 \
+  --cmake-args -Ddepthai_DIR="$DEPTHAI_DIR"
+
+echo "=============================="
+echo "DepthAI ROS2 v2 DONE"
+echo "=============================="
+echo "Run:"
+echo "source /opt/ros/$ROS_DISTRO/setup.bash"
+echo "source $WS/install/setup.bash"
