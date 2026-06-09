@@ -32,7 +32,7 @@ with open(cfg_file, "r") as f:
 
 data["lidar_config"] = [
     {
-        "broadcast_code": "3JEDLB100127651",
+        "broadcast_code": "3JEDLCL0016V73",
         "enable_connect": True,
         "enable_fan": True,
         "return_mode": 0,
@@ -41,7 +41,7 @@ data["lidar_config"] = [
         "extrinsic_parameter_source": 0
     },
     {
-        "broadcast_code": "3JEDLCL0016V731",
+        "broadcast_code": "3JEDLB100127651",
         "enable_connect": True,
         "enable_fan": True,
         "return_mode": 0,
