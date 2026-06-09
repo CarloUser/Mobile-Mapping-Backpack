@@ -1,0 +1,35 @@
+# Normalize line endings so files edited on Windows/OneDrive don't break on the
+# Linux/Jetson side. Anything executed on Linux must check out with LF.
+
+# Default: let git normalise text, store LF in the repo.
+* text=auto
+
+# Executed on the Linux/Jetson side -> always LF (CRLF breaks bash/ros2).
+*.sh        text eol=lf
+*.bash      text eol=lf
+*.py        text eol=lf
+*.yaml      text eol=lf
+*.yml       text eol=lf
+*.launch.py text eol=lf
+*.cfg       text eol=lf
+
+# Windows-only scripts -> keep CRLF.
+*.bat text eol=crlf
+*.ps1 text eol=crlf
+
+# Binary assets -> never normalise (prevents corruption).
+*.SLDPRT  binary
+*.SLDASM  binary
+*.stl     binary
+*.step    binary
+*.stp     binary
+*.f3d     binary
+*.pcd     binary
+*.db3     binary
+*.mcap    binary
+*.png     binary
+*.jpg     binary
+*.jpeg    binary
+*.zip     binary
+*.snapshot binary
+*.deb     binary
