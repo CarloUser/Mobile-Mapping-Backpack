@@ -66,12 +66,27 @@ def main():
         if h is None or l is None:
             avail = sorted({c.topic for c in reader.connections})
             raise SystemExit(f"Topic missing. Available: {avail}")
-        hr, _ = describe(f"HESAI {ht}", *h)
-        lr, _ = describe(f"LIVOX {lt}", *l)
+        hr, hh = describe(f"HESAI {ht}", *h)
+        lr, lh = describe(f"LIVOX {lt}", *l)
 
     print("\n[cross-topic, shared receive clock]")
     print(f"  start skew (livox - hesai): {(lr[0]-hr[0])*1e3:.1f} ms")
     print(f"  end skew:                   {(lr[-1]-hr[-1])*1e3:.1f} ms")
+
+    # Show what timestamp_source: header_aligned would actually produce. This is
+    # NOT applied to the raw stats above; run_odometry.py performs this shift.
+    if not (np.allclose(hh, 0) or np.allclose(lh, 0)):
+        off_h = np.median(hr - hh); off_l = np.median(lr - lh)
+        ah, al = hh + off_h, lh + off_l
+        print("\n[after header_aligned: each header shifted onto the shared recorder epoch]")
+        print(f"  raw header epoch gap (livox - hesai): {(lh[0]-hh[0]):.1f} s  "
+              f"<- the two sensor clocks differ; raw 'header' would be unusable")
+        print(f"  per-topic shift applied:  hesai {off_h:+.3f} s   livox {off_l:+.3f} s")
+        print(f"  aligned start skew (livox - hesai): {(al[0]-ah[0])*1e3:.1f} ms")
+        print(f"  aligned end skew:                   {(al[-1]-ah[-1])*1e3:.1f} ms")
+        print("  Both topics now share one epoch with clean header spacing. The remaining\n"
+              "  skew is just the recording start offset (Livox began first); the solver's\n"
+              "  overlap masking handles it. This is the timeline header_aligned uses.")
     print(
         "\nGuidance:\n"
         "  - If 'bag receive' is clean & monotonic on both topics, it is a safe common\n"
