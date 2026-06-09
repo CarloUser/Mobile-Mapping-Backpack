@@ -16,9 +16,10 @@ SCRIPTS=(
     "setup_depthai_v3_auto.sh"
 
     "setup_realsense_sdk_jetson.sh"
+    "setup_realsense_binary.sh"
 
     "setup_insta360_sdk_jetson.sh"
-    "setup_insta360_ws_with_sdk.sh"
+    "setup_insta360.sh"
     "config_insta360_jetson.sh"
 
     "setup_livox.sh"
