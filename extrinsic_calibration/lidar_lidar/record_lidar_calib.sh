@@ -72,7 +72,9 @@ wait_topic() {
   local t="$1" to="${2:-40}" start=$SECONDS
   echo -n "[record] waiting for $t ..."
   while (( SECONDS - start < to )); do
-    if timeout 5 ros2 topic echo "$t" --once >/dev/null 2>&1; then echo " ok"; return 0; fi
+    # best_effort subscriber is compatible with both best_effort and reliable
+    # publishers (LiDAR/IMU sensor data is published best-effort).
+    if timeout 5 ros2 topic echo "$t" --once --qos-reliability best_effort >/dev/null 2>&1; then echo " ok"; return 0; fi
   done
   echo " TIMEOUT"; return 1
 }
