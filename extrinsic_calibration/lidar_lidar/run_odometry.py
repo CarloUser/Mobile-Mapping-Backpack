@@ -118,6 +118,9 @@ def main():
     ap.add_argument("--out", default="./out")
     ap.add_argument("--hesai-topic", help="Override Hesai topic from config")
     ap.add_argument("--livox-topic", help="Override Livox topic from config")
+    ap.add_argument("--only", choices=["both", "hesai", "livox"], default="both",
+                    help="Run KISS-ICP for only one sensor. Use 'hesai' when the "
+                         "Livox trajectory comes from FAST-LIO instead.")
     args = ap.parse_args()
 
     cfg = yaml.safe_load(open(args.config))
@@ -131,13 +134,18 @@ def main():
     tsrc = cfg["bag"].get("timestamp_source", "header")
     bag = Path(args.bag)
     print(f"[run_odometry] reading {bag}")
+    written = []
     with AnyReader([bag], default_typestore=typestore) as reader:
-        th, WA = run_one(reader, hesai_topic, cfg["odometry"], tsrc)
-        tl, WB = run_one(reader, livox_topic, cfg["odometry"], tsrc)
-
-    write_tum(out / "hesai_tum.txt", th, WA)
-    write_tum(out / "livox_tum.txt", tl, WB)
-    print(f"[run_odometry] wrote {out / 'hesai_tum.txt'} and {out / 'livox_tum.txt'}")
+        if args.only in ("both", "hesai"):
+            th, WA = run_one(reader, hesai_topic, cfg["odometry"], tsrc)
+            write_tum(out / "hesai_tum.txt", th, WA); written.append("hesai_tum.txt")
+        if args.only in ("both", "livox"):
+            tl, WB = run_one(reader, livox_topic, cfg["odometry"], tsrc)
+            write_tum(out / "livox_tum.txt", tl, WB); written.append("livox_tum.txt")
+    print(f"[run_odometry] wrote {', '.join(written)} to {out}")
+    if args.only == "hesai":
+        print("\nLivox trajectory expected from FAST-LIO: "
+              "python fastlio_odom_to_tum.py --bag <odom_bag> --out out/livox_tum.txt")
     print("\nNext: python solve_extrinsic.py --hesai-traj out/hesai_tum.txt "
           "--livox-traj out/livox_tum.txt --config config.yaml")
 
