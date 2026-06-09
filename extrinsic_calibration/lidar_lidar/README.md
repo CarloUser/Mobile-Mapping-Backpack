@@ -89,11 +89,18 @@ Characterise both with:
 ```bash
 python inspect_bag_timing.py --bag <your_bag> --config config.yaml
 ```
-Then set `bag.timestamp_source` in `config.yaml`: keep `header` if both drivers
-share a synced clock (small, constant header-minus-receive offset); switch to
-`bag_receive` if the sensor clocks are not synced (the shared recorder clock then
-removes the inter-sensor skew). For metric-grade results, hardware time sync
-(PTP/PPS, see `docs/setup/03_time_sync.md`) makes `header` the best choice.
+Then set `bag.timestamp_source` in `config.yaml`:
+- `header` &mdash; only if both drivers share a synced clock (small, constant
+  header-minus-receive on both).
+- `header_aligned` &mdash; **recommended for this rig.** Each sensor's header is
+  clean but the two use different clock epochs; this keeps the low-jitter header
+  spacing and shifts both onto the shared recorder epoch via a robust median
+  offset. Requires header.stamp to be populated.
+- `bag_receive` &mdash; fallback if header.stamp is missing/zero; uses the shared
+  recorder clock but carries its arrival jitter into the timeline.
+
+For metric-grade results, hardware time sync (PTP/PPS, see
+`docs/setup/03_time_sync.md`) makes plain `header` the best choice.
 
 ### 1. Record a bag on the rig
 Only the two point-cloud topics are needed. While recording, follow the motion

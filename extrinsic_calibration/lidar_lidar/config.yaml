@@ -9,14 +9,20 @@ bag:
   # deserialize messages). Supported: dashing, eloquent, foxy, galactic, humble,
   # iron, jazzy, kilted, lyrical. The rig records under Humble.
   ros_distro: humble
-  # Which clock to timestamp each scan with when building the trajectories:
-  #   header      -> the driver's message header.stamp (best IF both LiDAR drivers
-  #                  stamp acquisition time on a shared/synced clock, e.g. PTP/PPS)
-  #   bag_receive -> the recorder's write clock (one clock for both topics; robust
-  #                  fallback that removes inter-sensor clock skew at the cost of a
-  #                  small constant driver-latency bias)
-  # Run inspect_bag_timing.py first to decide which to trust.
-  timestamp_source: header
+  # Which clock to timestamp each scan with when building the trajectories.
+  # Run inspect_bag_timing.py first to decide which to trust:
+  #   header         -> raw driver header.stamp. Best ONLY if both LiDAR drivers
+  #                     stamp on the same synced clock (PTP/PPS). Fails if the two
+  #                     sensors use different header epochs.
+  #   header_aligned -> each sensor's (clean, low-jitter) header spacing, shifted
+  #                     onto the shared recorder epoch by the robust median offset.
+  #                     Best when each header is clean but the two sensors do NOT
+  #                     share a clock (different epochs) -- this rig's case.
+  #                     Requires header.stamp to be populated.
+  #   bag_receive    -> the recorder's write clock (one clock for both topics).
+  #                     Robust fallback if header.stamp is missing/zero, but carries
+  #                     the recorder's arrival jitter into the timeline.
+  timestamp_source: header_aligned
 
 odometry:
   # KISS-ICP runs once per topic. These defaults suit indoor/handheld mapping.

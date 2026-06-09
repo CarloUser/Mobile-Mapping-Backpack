@@ -27,7 +27,19 @@ def load_tum(path):
         poses.append(T_from_xyz_quat(v[1:4], v[4:8]))
     if not poses:
         raise ValueError(f"No poses parsed from {path}")
-    return np.asarray(times), poses
+    times = np.asarray(times)
+    # Enforce strictly increasing time (interpolation/Slerp require it). Frames can
+    # arrive slightly out of order if a scan was delayed past a neighbour; sort by
+    # timestamp and drop any non-increasing duplicates. A no-op for clean data.
+    order = np.argsort(times, kind="stable")
+    times = times[order]; poses = [poses[i] for i in order]
+    keep = np.concatenate(([True], np.diff(times) > 0))
+    if not keep.all():
+        dropped = int((~keep).sum())
+        print(f"  [load_tum] dropped {dropped} non-increasing timestamp(s) from "
+              f"{path}")
+        times = times[keep]; poses = [p for p, k in zip(poses, keep) if k]
+    return times, poses
 
 
 def load_extrinsics(path):

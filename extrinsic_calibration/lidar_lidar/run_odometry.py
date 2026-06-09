@@ -66,25 +66,37 @@ def run_one(reader, topic, cfg_odo, timestamp_source="header"):
         config.mapping.voxel_size = float(cfg_odo["voxel_size"])
 
     odom = KissICP(config)
-    times, poses, n_zero = [], [], 0
+    header_t, recv_t, poses, n_zero = [], [], [], 0
     for conn, recv_ns, raw in reader.messages(connections=conns):
         msg = reader.deserialize(raw, conn.msgtype)
         pts, pts_t = read_point_cloud(msg)
         pts_t = pts_t if (pts_t is not None and len(pts_t) > 0) else np.array([])
         odom.register_frame(pts, pts_t)
-        if timestamp_source == "bag_receive":
-            t = recv_ns * 1e-9
-        else:
-            t = stamp_to_sec(msg.header.stamp)
-            if t == 0.0:
-                n_zero += 1
-        times.append(t)
+        ht = stamp_to_sec(msg.header.stamp)
+        if ht == 0.0:
+            n_zero += 1
+        header_t.append(ht)
+        recv_t.append(recv_ns * 1e-9)
         poses.append(odom.last_pose.copy())
     if not poses:
         raise SystemExit(f"No messages on topic '{topic}'.")
-    if timestamp_source == "header" and n_zero:
-        print(f"  [{topic}] WARNING: {n_zero} frames have header.stamp==0; "
-              f"consider timestamp_source: bag_receive")
+    header_t = np.asarray(header_t); recv_t = np.asarray(recv_t)
+    if timestamp_source == "bag_receive":
+        times = recv_t
+    elif timestamp_source == "header_aligned":
+        # Clean per-sensor header spacing, shifted onto the shared recorder epoch
+        # by the robust median offset. Removes the cross-sensor header-epoch
+        # difference while keeping header's low jitter. Best when each driver's
+        # header is clean but the two sensors do not share a clock.
+        times = header_t + np.median(recv_t - header_t)
+    elif timestamp_source == "header":
+        times = header_t
+        if n_zero:
+            print(f"  [{topic}] WARNING: {n_zero} frames have header.stamp==0; "
+                  f"use timestamp_source: bag_receive or header_aligned")
+    else:
+        raise SystemExit(f"Unknown timestamp_source '{timestamp_source}' "
+                         f"(use header, header_aligned, or bag_receive)")
     print(f"  [{topic}] {len(poses)} scans processed (timestamps: {timestamp_source})")
     return np.asarray(times), poses
 
