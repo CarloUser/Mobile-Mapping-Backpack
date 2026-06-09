@@ -5,6 +5,10 @@ bag:
   # ROS 2 point cloud topics recorded on the rig (sensor_msgs/PointCloud2).
   hesai_topic: /lidar_points        # HESAI JT128 (reference), confirmed on rig
   livox_topic: /livox/lidar         # Livox Avia PointCloud2, confirmed on rig
+  # ROS 2 distro the bag was recorded with (selects the rosbags typestore used to
+  # deserialize messages). Supported: dashing, eloquent, foxy, galactic, humble,
+  # iron, jazzy, kilted, lyrical. The rig records under Humble.
+  ros_distro: humble
 
 odometry:
   # KISS-ICP runs once per topic. These defaults suit indoor/handheld mapping.

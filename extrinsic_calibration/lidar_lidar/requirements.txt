@@ -4,5 +4,5 @@ numpy>=1.24
 scipy>=1.10
 pyyaml>=6.0
 matplotlib>=3.6
-kiss-icp>=1.0      # target-less LiDAR odometry (provides kiss_icp_pipeline CLI)
-rosbags>=0.9       # pure-python ROS 2 bag reader used by KISS-ICP
+kiss-icp>=1.0      # target-less LiDAR odometry (Python API used by run_odometry.py)
+rosbags>=0.9       # pure-python ROS 2 bag reader (run_odometry.py uses the ROS2_HUMBLE typestore)

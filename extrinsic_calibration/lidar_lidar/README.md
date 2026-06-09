@@ -62,7 +62,11 @@ well above 0.1. If it warns, your motion was too planar &mdash; recollect.
 - Time sync between the two LiDARs should be in place (see
   `docs/setup/03_time_sync.md`); the solver interpolates over small offsets but
   cannot fix large clock skew.
-- On the **PC**: `pip install -r requirements.txt`.
+- On the machine that runs this (your **PC** or the **Jetson** directly, since the
+  bags live there): `pip install -r requirements.txt`. KISS-ICP ships prebuilt
+  aarch64 wheels (cp38-cp313), so it installs on the Jetson without a source build.
+- Set `bag.ros_distro` in `config.yaml` to the distro the bag was recorded with
+  (default `humble`); it selects the rosbags typestore used to deserialize messages.
 
 ## Procedure
 
@@ -89,9 +93,12 @@ scp -r <jetson-user>@<jetson-ip>:~/lidar_calib_* .
 ```bash
 python run_odometry.py --bag ./lidar_calib_YYYYMMDD_HHMM --config config.yaml --out ./out
 ```
-Produces `out/hesai_tum.txt` and `out/livox_tum.txt`. (Internally runs
-`kiss_icp_pipeline` once per topic. If you prefer, run KISS-ICP yourself and drop
-the two timestamped-TUM files at those paths.)
+Produces `out/hesai_tum.txt` and `out/livox_tum.txt`. The script reads the bag
+itself (with an explicit ROS 2 Humble typestore) and drives KISS-ICP through its
+Python API, so you do **not** need to patch the installed kiss-icp package and
+there is no separate results/ directory to hunt for. If KISS-ICP can't track
+(near-empty trajectory), the scene was too featureless or `max_range`/`voxel_size`
+need tuning in `config.yaml`.
 
 ### 4. Solve the extrinsic (PC)
 ```bash
@@ -135,7 +142,8 @@ overwrite `extrinsics_initial.yaml` or `Coordinate_systems/coordinate_systems.ya
 | Few or zero motion pairs | Sequence too short or too slow; lower `min_angle_deg`, raise `stride`, or record longer. |
 | Large correction vs CAD | Wrong Livox topic, frame-axis mismatch, or time skew. Verify topics and `03_time_sync.md`. |
 | High residuals but good observability | Odometry drift (featureless scene) or clock skew between LiDARs. |
-| `kiss_icp_pipeline not found` | `pip install -r requirements.txt`. |
+| `ModuleNotFoundError: kiss_icp` / `rosbags` | `pip install -r requirements.txt`. |
+| `Topic '...' not found in bag` | The script prints the bag's actual topics; fix the names in `config.yaml`. |
 
 ## Scope and next steps
 
