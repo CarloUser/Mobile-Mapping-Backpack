@@ -18,7 +18,8 @@
 # rotation-observability gate tells you if the walk was rich enough -- if it warns,
 # just re-run this script and walk with more pitch/roll.
 
-set -uo pipefail
+# NOTE: no `set -u` -- ROS 2 setup.bash references unset vars when sourced.
+set -o pipefail
 
 # ===================== EDIT IF YOUR PATHS DIFFER =====================
 # This rig builds all drivers into one workspace (~/ros2_ws, per bash/build_sensors.sh).
