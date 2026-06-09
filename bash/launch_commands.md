@@ -3,19 +3,19 @@
 *open two terminals:*
 
 ```
-roslaunch xsens_mti_driver xsens_mti_node.launch
+ros2 launch xsens_mti_ros2_driver xsens_mti_node.launch
 ```
 
 *or with the 3D display rviz:*
 
 ```
-roslaunch xsens_mti_driver display.launch
+ros2 launch xsens_mti_driver display.launch
 ```
 
 *and then:*
 
 ```
-roslaunch ntrip ntrip.launch
+ros2 launch ntrip ntrip.launch
 ```
 
 # Hesai
@@ -96,11 +96,14 @@ Command Line
 
 ```
 ros2 run depthai_ros_driver_v3 driver_node
+
 ```
 
 # OAK D 1
 
-
+```
+ros2 launch depthai_ros_driver camera.launch.py
+```
 
 # Realsense
 

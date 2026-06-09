@@ -6,7 +6,7 @@ echo "DepthAI ROS2 v2 Setup Script"
 echo "=============================="
 
 ROS_DISTRO=humble
-WS="~/ros2_ws"
+WS=$HOME~/ros2_ws
 
 echo "[1/7] Source ROS..."
 source /opt/ros/$ROS_DISTRO/setup.bash
@@ -56,6 +56,18 @@ rosdep install --from-paths src --ignore-src -r -y
 echo "[7/7] Build depthai-ros v2..."
 rm -rf build install log
 
+echo "[6.5/7] Installing common ROS runtime dependencies..."
+
+sudo apt install -y \
+  ros-$ROS_DISTRO-diagnostic-updater \
+  ros-$ROS_DISTRO-camera-info-manager \
+  ros-$ROS_DISTRO-image-transport \
+  ros-$ROS_DISTRO-cv-bridge \
+  ros-$ROS_DISTRO-message-filters \
+  ros-$ROS_DISTRO-tf2-ros \
+  ros-$ROS_DISTRO-tf2-geometry-msgs \
+  ros-$ROS_DISTRO-rviz2
+
 colcon build \
   --symlink-install \
   --parallel-workers 1 \
@@ -67,3 +79,16 @@ echo "=============================="
 echo "Run:"
 echo "source /opt/ros/$ROS_DISTRO/setup.bash"
 echo "source $WS/install/setup.bash"
+
+echo ""
+echo "Verifying installation..."
+
+ros2 pkg list | grep depthai || true
+
+echo ""
+echo "Available launch files:"
+ros2 pkg executables depthai_ros_driver || true
+
+echo ""
+echo "Checking OAK permissions..."
+ls /etc/udev/rules.d | grep depthai || echo "WARNING: udev rules not found"
