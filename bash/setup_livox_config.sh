@@ -6,7 +6,7 @@ echo "======================================"
 echo "Livox CONFIG SETUP"
 echo "======================================"
 
-CONFIG_FILE=~/ros2_ws/src/livox_ros2_avia/config/livox_lidar_config.json
+CONFIG_FILE=~/ros2_ws/src/livox_ros2_avia/livox_ros2_avia/config/livox_lidar_config.json
 
 # -----------------------------
 # CHECK FILE
