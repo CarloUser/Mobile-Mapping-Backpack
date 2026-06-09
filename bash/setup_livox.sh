@@ -50,7 +50,6 @@ rosdep update
 
 rosdep install --from-paths src --ignore-src -r -y
 
-colcon build --symlink-install --parallel-workers 2
 
 # -----------------------------
 # STEP 5: Done

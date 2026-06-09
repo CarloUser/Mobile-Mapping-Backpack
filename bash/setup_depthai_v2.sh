@@ -6,7 +6,7 @@ echo "DepthAI ROS2 v2 Setup Script"
 echo "=============================="
 
 ROS_DISTRO=humble
-WS=$HOME~/ros2_ws
+WS=$HOME/ros2_ws
 
 echo "[1/7] Source ROS..."
 source /opt/ros/$ROS_DISTRO/setup.bash

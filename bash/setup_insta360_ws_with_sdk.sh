@@ -71,7 +71,7 @@ rosdep install --from-paths src --ignore-src -r -y
 # -----------------------------
 echo "[6/7] Building workspace..."
 
-colcon build --symlink-install --parallel-workers 2
+
 
 # -----------------------------
 # STEP 7: Setup udev rule

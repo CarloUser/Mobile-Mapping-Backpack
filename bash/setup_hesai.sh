@@ -55,9 +55,7 @@ echo "[5/6] Building workspace..."
 cd $WS
 
 # Optional: disable PTCS (safer if not needed)
-colcon build --symlink-install \
-    --parallel-workers 2 \
-    --cmake-args -DWITH_PTCS_USE=OFF
+
 
 # -----------------------------
 # STEP 6: Done

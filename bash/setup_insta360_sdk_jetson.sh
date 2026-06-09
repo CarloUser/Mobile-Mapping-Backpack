@@ -14,7 +14,7 @@ ZIP_NAME="Linux_CameraSDK-2.1.1_MediaSDK-3.1.1.zip"
 INSTALL_DIR=~/insta360_sdk
 ZIP_PATH="$DOWNLOAD_DIR/$ZIP_NAME"
 
-LINUX_TAR_PATTERN="CameraSDK-2.1.1-Linux.tar.gz"
+JETSON_TAR_PATTERN="CameraSDK-*jetson*.tar.gz"
 
 echo "[1/6] Installing tools..."
 sudo apt-get update
@@ -37,11 +37,11 @@ unzip -o "$ZIP_PATH" -d "$INSTALL_DIR"
 
 echo "[5/6] Extracting Jetson CameraSDK tar.gz..."
 
-JETSON_TAR=$(find "$INSTALL_DIR" -type f -name "$LINUX_TAR_PATTERN" | head -n 1)
+JETSON_TAR=$(find "$INSTALL_DIR" -type f -name "$JETSON_TAR_PATTERN" | head -n 1)
 
 if [ -z "$JETSON_TAR" ]; then
     echo "Jetson CameraSDK tar.gz not found!"
-    echo "Expected pattern: $LINUX_TAR_PATTERN"
+    echo "Expected pattern: $JETSON_TAR_PATTERN"
     exit 1
 fi
 

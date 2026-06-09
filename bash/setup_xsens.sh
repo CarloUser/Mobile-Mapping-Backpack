@@ -55,7 +55,7 @@ fi
 echo "[5/5] Building..."
 
 cd $WS
-colcon build
+
 
 echo "======================================"
 echo "Xsens ROS2 setup COMPLETE"

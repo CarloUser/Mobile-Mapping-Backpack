@@ -120,7 +120,6 @@ rosdep install --from-paths src --ignore-src -r -y
 # -----------------------------
 echo "[5/6] Building..."
 
-colcon build --symlink-install --parallel-workers 2
 
 source ~/ros2_ws/install/setup.bash
 
