@@ -75,6 +75,26 @@ well above 0.1. If it warns, your motion was too planar &mdash; recollect.
 python test_handeye.py        # should end with "ALL ASSERTIONS PASSED"
 ```
 
+### 0b. Check time synchronization (do this before trusting a result)
+The solver puts both LiDARs on one timeline and interpolates between scans, so the
+timestamps must be comparable. A ROS 2 bag already stores two real per-message
+timestamps you can use directly &mdash; there is no need to reconstruct timestamps
+from a start time and a nominal rate (that assumes a perfectly constant rate and
+no dropped frames, and is less accurate than the stamps already in the bag):
+- `header.stamp` &mdash; the driver's (ideally acquisition) time;
+- bag receive time &mdash; the recorder's write clock, a single clock for *both*
+  topics.
+
+Characterise both with:
+```bash
+python inspect_bag_timing.py --bag <your_bag> --config config.yaml
+```
+Then set `bag.timestamp_source` in `config.yaml`: keep `header` if both drivers
+share a synced clock (small, constant header-minus-receive offset); switch to
+`bag_receive` if the sensor clocks are not synced (the shared recorder clock then
+removes the inter-sensor skew). For metric-grade results, hardware time sync
+(PTP/PPS, see `docs/setup/03_time_sync.md`) makes `header` the best choice.
+
 ### 1. Record a bag on the rig
 Only the two point-cloud topics are needed. While recording, follow the motion
 guidance above for 2-5 minutes in a feature-rich space (walls, furniture, corners

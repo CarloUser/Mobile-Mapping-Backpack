@@ -42,8 +42,13 @@ def stamp_to_sec(stamp):
     return float(stamp.sec) + float(stamp.nanosec) * 1e-9
 
 
-def run_one(reader, topic, cfg_odo):
-    """Run KISS-ICP over one topic; return (timestamps, list of 4x4 poses)."""
+def run_one(reader, topic, cfg_odo, timestamp_source="header"):
+    """Run KISS-ICP over one topic; return (timestamps, list of 4x4 poses).
+
+    timestamp_source: 'header' uses msg.header.stamp (acquisition time, best when
+    both drivers share a synced clock); 'bag_receive' uses the recorder write clock
+    (one clock for both topics), a robust fallback for unsynced sensor clocks.
+    """
     from kiss_icp.kiss_icp import KissICP
     from kiss_icp.config import load_config
     from kiss_icp.tools.point_cloud2 import read_point_cloud
@@ -61,17 +66,26 @@ def run_one(reader, topic, cfg_odo):
         config.mapping.voxel_size = float(cfg_odo["voxel_size"])
 
     odom = KissICP(config)
-    times, poses = [], []
-    for conn, _, raw in reader.messages(connections=conns):
+    times, poses, n_zero = [], [], 0
+    for conn, recv_ns, raw in reader.messages(connections=conns):
         msg = reader.deserialize(raw, conn.msgtype)
         pts, pts_t = read_point_cloud(msg)
         pts_t = pts_t if (pts_t is not None and len(pts_t) > 0) else np.array([])
         odom.register_frame(pts, pts_t)
-        times.append(stamp_to_sec(msg.header.stamp))
+        if timestamp_source == "bag_receive":
+            t = recv_ns * 1e-9
+        else:
+            t = stamp_to_sec(msg.header.stamp)
+            if t == 0.0:
+                n_zero += 1
+        times.append(t)
         poses.append(odom.last_pose.copy())
     if not poses:
         raise SystemExit(f"No messages on topic '{topic}'.")
-    print(f"  [{topic}] {len(poses)} scans processed")
+    if timestamp_source == "header" and n_zero:
+        print(f"  [{topic}] WARNING: {n_zero} frames have header.stamp==0; "
+              f"consider timestamp_source: bag_receive")
+    print(f"  [{topic}] {len(poses)} scans processed (timestamps: {timestamp_source})")
     return np.asarray(times), poses
 
 
@@ -102,11 +116,12 @@ def main():
     from rosbags.highlevel import AnyReader
     typestore = get_typestore_for(cfg["bag"].get("ros_distro", "humble"))
 
+    tsrc = cfg["bag"].get("timestamp_source", "header")
     bag = Path(args.bag)
     print(f"[run_odometry] reading {bag}")
     with AnyReader([bag], default_typestore=typestore) as reader:
-        th, WA = run_one(reader, hesai_topic, cfg["odometry"])
-        tl, WB = run_one(reader, livox_topic, cfg["odometry"])
+        th, WA = run_one(reader, hesai_topic, cfg["odometry"], tsrc)
+        tl, WB = run_one(reader, livox_topic, cfg["odometry"], tsrc)
 
     write_tum(out / "hesai_tum.txt", th, WA)
     write_tum(out / "livox_tum.txt", tl, WB)
