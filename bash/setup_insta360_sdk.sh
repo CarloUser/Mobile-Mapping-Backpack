@@ -51,7 +51,7 @@ JETSON_DIR=$(dirname "$JETSON_TAR")
 tar -xzf "$JETSON_TAR" -C "$JETSON_DIR"
 
 echo "[6/6] Cleaning up..."
-rm -f "$ZIP_PATH"
+# rm -f "$ZIP_PATH"
 
 echo "======================================"
 echo "Insta360 SDK setup COMPLETE"
