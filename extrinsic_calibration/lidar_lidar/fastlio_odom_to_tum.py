@@ -48,6 +48,12 @@ def main():
                     help="LiDAR->IMU rotation, row-major 3x3 (must match FAST-LIO config)")
     ap.add_argument("--no-extrinsic", action="store_true",
                     help="Do NOT compose the extrinsic (output the IMU-frame trajectory)")
+    ap.add_argument("--align-bag",
+                    help="Original sensor bag: shift output stamps by "
+                         "median(bag_receive - header) of --align-topic, mapping the "
+                         "Livox hardware clock onto the recorder epoch (the same "
+                         "'header_aligned' convention run_odometry.py uses for the Hesai)")
+    ap.add_argument("--align-topic", default="/livox/lidar")
     args = ap.parse_args()
 
     T_imu_lidar = np.eye(4) if args.no_extrinsic else \
@@ -56,6 +62,22 @@ def main():
     from rosbags.highlevel import AnyReader
     from rosbags.typesys import Stores, get_typestore
     ts = get_typestore(getattr(Stores, f"ROS2_{args.ros_distro.upper()}"))
+
+    t_shift = 0.0
+    if args.align_bag:
+        offs = []
+        with AnyReader([Path(args.align_bag)], default_typestore=ts) as reader:
+            conns = [c for c in reader.connections if c.topic == args.align_topic]
+            if not conns:
+                avail = sorted({c.topic for c in reader.connections})
+                raise SystemExit(f"Topic '{args.align_topic}' not in align bag. Available: {avail}")
+            for conn, recv_ns, raw in reader.messages(connections=conns):
+                m = reader.deserialize(raw, conn.msgtype)
+                st = m.header.stamp
+                offs.append(recv_ns * 1e-9 - (float(st.sec) + float(st.nanosec) * 1e-9))
+        t_shift = float(np.median(offs))
+        print(f"[fastlio_odom_to_tum] aligning stamps: median(receive-header) on "
+              f"{args.align_topic} = {t_shift:.6f} s ({len(offs)} msgs)")
 
     out = Path(args.out); out.parent.mkdir(parents=True, exist_ok=True)
     n = 0
@@ -67,7 +89,7 @@ def main():
         for conn, _, raw in reader.messages(connections=conns):
             m = reader.deserialize(raw, conn.msgtype)
             st = m.header.stamp
-            t = float(st.sec) + float(st.nanosec) * 1e-9
+            t = float(st.sec) + float(st.nanosec) * 1e-9 + t_shift
             p = m.pose.pose.position
             q = m.pose.pose.orientation
             T_map_imu = se3(R.from_quat([q.x, q.y, q.z, q.w]).as_matrix(), [p.x, p.y, p.z])
