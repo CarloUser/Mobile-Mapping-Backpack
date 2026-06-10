@@ -1,43 +1,60 @@
 # FAST-LIO config for the backpack's Livox Avia (rear LiDAR).
-# Use with Ericsii/FAST_LIO_ROS2:
-#   ros2 launch fast_lio mapping.launch.py config_file:=fast_lio_avia.yaml
+# Use with Ericsii/FAST_LIO_ROS2 (ros2 branch):
+#   ros2 launch fast_lio mapping.launch.py \
+#       config_path:=<dir containing this file> config_file:=fast_lio_avia.yaml rviz:=false
 # Then record /Odometry and convert it with fastlio_odom_to_tum.py.
+#
+# IMPORTANT (ROS 2 param format): every parameter MUST live under
+# `/**:` -> `ros__parameters:`. FAST-LIO reads nested groups (common/preprocess/
+# mapping/publish/pcd_save) AND several flat top-level keys (point_filter_num,
+# max_iteration, filter_size_*, etc.). Mirror the upstream config/avia.yaml layout.
 #
 # The extrinsic below is the Livox Avia LiDAR pose in the IMU frame (FAST-LIO's
 # convention). It MUST match the --ext-t/--ext-r passed to fastlio_odom_to_tum.py
 # so the IMU-frame odometry is converted back to the LiDAR frame consistently.
 
-common:
-    lid_topic: "/livox/lidar"      # Livox CustomMsg topic (re-record in CustomMsg mode!)
-    imu_topic: "/livox/imu"        # Livox built-in IMU
-    time_sync_en: false            # LiDAR and IMU share the Livox clock -> keep false
-    time_offset_lidar_to_imu: 0.0
+/**:
+    ros__parameters:
+        feature_extract_enable: false
+        point_filter_num: 3
+        max_iteration: 3
+        filter_size_surf: 0.5
+        filter_size_map: 0.5
+        cube_side_length: 1000.0
+        runtime_pos_log_enable: false
+        map_file_path: "./test.pcd"
 
-preprocess:
-    lidar_type: 1                  # 1 = Livox
-    scan_line: 6                   # Avia
-    blind: 1.0                     # ignore returns closer than 1 m (indoor calibration;
-                                   # the stock 4.0 is too aggressive for a small room)
+        common:
+            lid_topic: "/livox/lidar"      # Livox CustomMsg topic (recorded in CustomMsg mode)
+            imu_topic: "/livox/imu"        # Livox built-in IMU
+            time_sync_en: false            # LiDAR and IMU share the Livox clock -> keep false
+            time_offset_lidar_to_imu: 0.0
 
-mapping:
-    acc_cov: 0.1
-    gyr_cov: 0.1
-    b_acc_cov: 0.0001
-    b_gyr_cov: 0.0001
-    fov_degree: 90
-    det_range: 100.0               # indoor; lower than the 450 default
-    extrinsic_est_en: false        # extrinsic is known; do not online-estimate
-    extrinsic_T: [0.04165, 0.02326, -0.0284]   # Avia LiDAR position in IMU frame
-    extrinsic_R: [1, 0, 0,
-                  0, 1, 0,
-                  0, 0, 1]
+        preprocess:
+            lidar_type: 1                  # 1 = Livox serials
+            scan_line: 6                   # Avia
+            blind: 1.0                     # ignore returns closer than 1 m (indoor calibration;
+                                           # the stock 4.0 discards too much near structure in a room)
 
-publish:
-    path_en: false
-    scan_publish_en: true
-    dense_publish_en: true
-    scan_bodyframe_pub_en: true
+        mapping:
+            acc_cov: 0.1
+            gyr_cov: 0.1
+            b_acc_cov: 0.0001
+            b_gyr_cov: 0.0001
+            fov_degree: 90.0
+            det_range: 100.0               # indoor; lower than the 450 default
+            extrinsic_est_en: false        # extrinsic is known; do not online-estimate
+            extrinsic_T: [0.04165, 0.02326, -0.0284]   # Avia LiDAR position in IMU frame
+            extrinsic_R: [1., 0., 0.,
+                          0., 1., 0.,
+                          0., 0., 1.]
 
-pcd_save:
-    pcd_save_en: false             # not needed for calibration
-    interval: -1
+        publish:
+            path_en: false
+            scan_publish_en: true
+            dense_publish_en: true
+            scan_bodyframe_pub_en: true
+
+        pcd_save:
+            pcd_save_en: false             # not needed for calibration
+            interval: -1

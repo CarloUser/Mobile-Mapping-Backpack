@@ -14,7 +14,12 @@ re-record (CustomMsg + IMUs)
    '-- solve_extrinsic.py --> extrinsics_calibrated.yaml --> validate.py
 ```
 
-## 1. Re-record (one new ~5 min walk)
+## 1. Re-record (one new ~5 min walk) — ✅ DONE
+
+> Already recorded: `~/recordings/lidar/lidar_calib_imu_20260609_190844` (153.7 s,
+> all four topics; `/livox/lidar` is `livox_interfaces/msg/CustomMsg`, 3073 msgs).
+> The Hesai trajectory is already built (`out/hesai_tum.txt`). Skip to **step 2**.
+> Re-recording instructions kept below for reference.
 
 FAST-LIO needs **per-point timestamps**, which only the Livox **CustomMsg** format
 carries (your previous PointCloud2 had fields `x y z intensity tag line` &mdash; no
@@ -36,46 +41,81 @@ tilt/roll) for 2-5 minutes in a feature-rich space. Confirm the Livox cloud is n
 CustomMsg: `ros2 topic info -v /livox/lidar` should show a `CustomMsg` type, not
 `PointCloud2`.
 
-## 2. Build FAST-LIO2 on the Jetson
+## 2. Build FAST-LIO2 on the Jetson (with the CustomMsg fix)
+
+**Two things the upstream README gets wrong for us:** (a) the ROS 2 code lives on
+the **`ros2` branch**, not `main` (`main` is the old ROS 1/catkin version and will
+not `colcon build`); (b) FAST-LIO is hard-coded to `livox_ros_driver2/msg/CustomMsg`,
+but our `livox_ros2_avia` driver publishes `livox_interfaces/msg/CustomMsg`. Those
+two messages are **field-for-field identical** (`header, timebase, point_num,
+lidar_id, rsvd, points[]{offset_time,x,y,z,reflectivity,tag,line}`), so the fix is a
+pure package rename — done by `fastlio_patch_livox_interfaces.sh` in this folder.
+No relay, no second message package.
 
 ```bash
+# 0. Source the driver workspace FIRST so the build can find livox_interfaces.
+source /opt/ros/humble/setup.bash
+source ~/ros2_ws/install/setup.bash
+#    Confirm the message + field names (sanity):
+ros2 interface show livox_interfaces/msg/CustomMsg
+ros2 interface show livox_interfaces/msg/CustomPoint   # offset_time,x,y,z,reflectivity,tag,line
+
+# 1. Clone the ROS 2 branch (NOT main) with submodules (ikd-Tree).
 mkdir -p ~/fastlio_ws/src && cd ~/fastlio_ws/src
-git clone https://github.com/Ericsii/FAST_LIO_ROS2.git --recursive
+git clone -b ros2 --recursive https://github.com/Ericsii/FAST_LIO_ROS2.git
+
+# 2. Patch livox_ros_driver2 -> livox_interfaces (run from the repo root).
+cd ~/fastlio_ws/src/FAST_LIO_ROS2
+bash ~/Documents/Mobile-Mapping-Backpack/extrinsic_calibration/lidar_lidar/fastlio_patch_livox_interfaces.sh
+#    (adjust the path to wherever this repo is checked out on the Jetson)
+
+# 3. Build. rosdep can't resolve the local interface package, so skip it.
 cd ~/fastlio_ws
-rosdep install --from-paths src --ignore-src -y
+rosdep install --from-paths src --ignore-src -y --skip-keys livox_interfaces
 colcon build --symlink-install
 source install/setup.bash
 ```
 
-> **The one integration risk to check first (CustomMsg package).** The Avia is an
-> SDK1 sensor, so the `livox_ros2_avia` driver publishes its CustomMsg from the
-> `livox_interfaces` package. FAST_LIO_ROS2 expects `livox_ros_driver2/CustomMsg`.
-> These have the same fields but are different message *packages*, so FAST-LIO
-> won't subscribe to the wrong one. Check the actual type with
-> `ros2 topic info -v /livox/lidar`, then either:
-> - build FAST-LIO against the package your driver uses (point its CustomMsg
->   include/dependency at `livox_interfaces`), **or**
-> - run a small relay that republishes `livox_interfaces/CustomMsg` as
->   `livox_ros_driver2/CustomMsg` (identical fields) and point FAST-LIO at that.
->
-> This is the only part I couldn't pre-solve from here; tell me which CustomMsg
-> type `topic info` reports and I'll hand you the exact one-file fix.
+If `ros2 interface show` reports a CustomPoint field name different from the list
+above, the rename alone isn't enough (the C++ in `src/preprocess.cpp` reads those
+fields by name). That's unlikely for an SDK1 clone — but send me the output and I'll
+give you the exact field-access edits.
 
 ## 3. Run FAST-LIO on the bag, record its odometry
 
-Copy `fast_lio_avia.yaml` (in this folder) into the FAST-LIO `config/` dir (or pass
-its path). Then, on bag playback:
+The launch takes `config_path` (a directory) + `config_file` (a filename in it).
+Point them at this folder's `fast_lio_avia.yaml`, and turn RViz off on the headless
+Jetson (`rviz:=false`). FAST-LIO reads from live topics, so we play the recorded bag
+into it. **Open 3 tmux panes**, each with ROS sourced
+(`source /opt/ros/humble/setup.bash && source ~/fastlio_ws/install/setup.bash`):
 
 ```bash
-# terminal 1
-ros2 launch fast_lio mapping.launch.py config_file:=fast_lio_avia.yaml
-# terminal 2
-ros2 bag record -o livox_odom /Odometry
-# terminal 3
-ros2 bag play lidar_calib_imu
+CFG=~/Documents/Mobile-Mapping-Backpack/extrinsic_calibration/lidar_lidar
+BAG=~/recordings/lidar/lidar_calib_imu_20260609_190844     # your recorded bag
+
+# pane 1 — FAST-LIO (headless)
+ros2 launch fast_lio mapping.launch.py \
+    config_path:=$CFG config_file:=fast_lio_avia.yaml rviz:=false
+
+# pane 2 — record only the odometry it emits
+ros2 bag record -o ~/recordings/lidar/livox_odom /Odometry
+
+# pane 3 — replay the calibration bag (feeds /livox/lidar + /livox/imu to FAST-LIO)
+ros2 bag play "$BAG"
 ```
-Let it run to the end, then stop the recorder. Sanity-check in RViz that the Livox
-map looks rigid (walls stay put), not smeared.
+
+Watch pane 1: after a second or two it should print iteration/“IMU Initial” logs and
+keep up with playback. When `ros2 bag play` finishes, Ctrl-C pane 2 (stop the
+recorder), then pane 1. Quick health check on the odometry bag:
+
+```bash
+ros2 bag info ~/recordings/lidar/livox_odom     # /Odometry, a few thousand msgs
+```
+
+If pane 1 logs `Failed to find match for field 'time'` or the message count on
+`/Odometry` is ~0, the Livox cloud wasn't CustomMsg / per-point time is missing —
+re-check step 1. If FAST-LIO diverges (positions explode), reduce `point_filter_num`
+or check the bag's IMU is on `/livox/imu`.
 
 ## 4. Build the two trajectories
 

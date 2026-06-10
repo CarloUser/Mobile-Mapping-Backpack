@@ -61,6 +61,11 @@ for pkg in hesai_ros_driver livox_ros2_avia; do
   ros2 pkg prefix "$pkg" >/dev/null 2>&1 || { echo "[record] package '$pkg' not found after sourcing $WS_SETUP"; exit 1; }
 done
 
+# Refresh the ROS 2 daemon: a stale daemon's discovery cache has caused the topic
+# checks below to miss live publishers (seen as !rclpy.ok() errors).
+ros2 daemon stop >/dev/null 2>&1 || true
+ros2 daemon start >/dev/null 2>&1 || true
+
 # --- launch drivers ---
 echo "[record] launching Hesai driver (log: $LOGDIR/hesai.log)"
 $HESAI_LAUNCH >"$LOGDIR/hesai.log" 2>&1 & HESAI_PID=$!
@@ -78,8 +83,10 @@ wait_topic() {
   done
   echo " TIMEOUT"; return 1
 }
+echo "[record] giving drivers a few seconds to initialise..."
+sleep 8
 for t in "${TOPICS[@]}"; do
-  wait_topic "$t" 45 || { echo "[record] ERROR: $t not publishing. Check $LOGDIR/*.log"; exit 1; }
+  wait_topic "$t" 60 || { echo "[record] ERROR: $t not publishing. Check $LOGDIR/*.log"; exit 1; }
 done
 
 # --- hard-check: Livox must be CustomMsg, not PointCloud2 ---
