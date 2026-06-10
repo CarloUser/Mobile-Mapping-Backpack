@@ -1,0 +1,276 @@
+calibration_results:
+  insta360:
+    run_status: completed
+    completed_calibrations:
+      - insta360_back
+      - insta360_front
+    notes:
+      - "First recorded calibration block. More camera results can be appended later."
+    raw_console_log: |
+      Vinsta360_front: captured 27/30
+      insta360_front: captured 28/30
+      insta360_front: captured 29/30
+      insta360_front: captured 30/30
+
+      === Calibrating insta360_back ===
+      Loading images from images\insta360_back
+      Found 30 images
+      Valid frames: 30  Rejected: 0
+      Fisheye reprojection error: 0.3968 px
+      Camera matrix K:
+      [[634.3420624    0.         938.74227292]
+       [  0.         641.32600798 280.50286349]
+       [  0.           0.           1.        ]]
+      Distortion: [[ 0.10900274 -0.02707669  0.01917958 -0.00268866]]
+      Saved to calibration_results\insta360_back_calib.yaml
+
+      === Calibrating insta360_front ===
+      Loading images from images\insta360_front
+      Found 30 images
+      Valid frames: 30  Rejected: 0
+      Fisheye reprojection error: 0.4683 px
+      Camera matrix K:
+      [[621.62939566   0.         956.776582  ]
+       [  0.         627.44260696 807.87593215]
+       [  0.           0.           1.        ]]
+      Distortion: [[ 0.11994563 -0.06149808  0.06297787 -0.01749709]]
+      Saved to calibration_results\insta360_front_calib.yaml
+
+      Completed calibrations: insta360_back, insta360_front
+      PS C:\Users\jarja>
+    cameras:
+      insta360_back:
+        image_dir: "images/insta360_back"
+        output_file: "calibration_results/insta360_back_calib.yaml"
+        images_found: 30
+        valid_frames: 30
+        rejected_frames: 0
+        calibration_model: "fisheye"
+        fisheye_model: true
+        reprojection_error_px: 0.3968
+        camera_matrix:
+          rows: 3
+          cols: 3
+          data:
+            - [634.3420624, 0.0, 938.74227292]
+            - [0.0, 641.32600798, 280.50286349]
+            - [0.0, 0.0, 1.0]
+        dist_coeffs:
+          rows: 1
+          cols: 4
+          data: [0.10900274, -0.02707669, 0.01917958, -0.00268866]
+        useful_info:
+          fx_px: 634.3420624
+          fy_px: 641.32600798
+          cx_px: 938.74227292
+          cy_px: 280.50286349
+      insta360_front:
+        image_dir: "images/insta360_front"
+        output_file: "calibration_results/insta360_front_calib.yaml"
+        images_found: 30
+        valid_frames: 30
+        rejected_frames: 0
+        calibration_model: "fisheye"
+        fisheye_model: true
+        reprojection_error_px: 0.4683
+        camera_matrix:
+          rows: 3
+          cols: 3
+          data:
+            - [621.62939566, 0.0, 956.776582]
+            - [0.0, 627.44260696, 807.87593215]
+            - [0.0, 0.0, 1.0]
+        dist_coeffs:
+          rows: 1
+          cols: 4
+          data: [0.11994563, -0.06149808, 0.06297787, -0.01749709]
+        useful_info:
+          fx_px: 621.62939566
+          fy_px: 627.44260696
+          cx_px: 956.776582
+          cy_px: 807.87593215
+  oak4d_front:
+    run_status: completed
+    device:
+      type: "OAK4D Pro"
+    image_dir: "images/oak4d_front"
+    output_file: "calibration_results/oak4d_front_calib.yaml"
+    images_found: 30
+    valid_frames: 30
+    rejected_frames: 0
+    calibration_model: "plumb_bob"
+    fisheye_model: false
+    reprojection_error_px: 2.4319
+    camera_matrix:
+      rows: 3
+      cols: 3
+      data:
+        - [2981.57920, 0.0, 2059.49685]
+        - [0.0, 2985.13675, 1065.24919]
+        - [0.0, 0.0, 1.0]
+    dist_coeffs:
+      rows: 5
+      cols: 1
+      data: [0.1151311, -0.14635391, -0.00629995, 0.00970178, 0.01275872]
+    useful_info:
+      fx_px: 2981.57920
+      fy_px: 2985.13675
+      cx_px: 2059.49685
+      cy_px: 1065.24919
+      quality_warning: "Reprojection error > 0.5 px; consider capturing more varied images."
+    raw_console_log: |
+      Captured 20/30: C:\Users\jarja\OneDrive - TUM\Engineering Project CAD\Calibrationcamera\images\oak4d_front\frame_0019.png
+      Captured 21/30: C:\Users\jarja\OneDrive - TUM\Engineering Project CAD\Calibrationcamera\images\oak4d_front\frame_0020.png
+      Captured 22/30: C:\Users\jarja\OneDrive - TUM\Engineering Project CAD\Calibrationcamera\images\oak4d_front\frame_0021.png
+      Captured 23/30: C:\Users\jarja\OneDrive - TUM\Engineering Project CAD\Calibrationcamera\images\oak4d_front\frame_0022.png
+      Captured 24/30: C:\Users\jarja\OneDrive - TUM\Engineering Project CAD\Calibrationcamera\images\oak4d_front\frame_0023.png
+      Captured 25/30: C:\Users\jarja\OneDrive - TUM\Engineering Project CAD\Calibrationcamera\images\oak4d_front\frame_0024.png
+      Captured 26/30: C:\Users\jarja\OneDrive - TUM\Engineering Project CAD\Calibrationcamera\images\oak4d_front\frame_0025.png
+      Captured 27/30: C:\Users\jarja\OneDrive - TUM\Engineering Project CAD\Calibrationcamera\images\oak4d_front\frame_0026.png
+      Captured 28/30: C:\Users\jarja\OneDrive - TUM\Engineering Project CAD\Calibrationcamera\images\oak4d_front\frame_0027.png
+      Captured 29/30: C:\Users\jarja\OneDrive - TUM\Engineering Project CAD\Calibrationcamera\images\oak4d_front\frame_0028.png
+      Captured 30/30: C:\Users\jarja\OneDrive - TUM\Engineering Project CAD\Calibrationcamera\images\oak4d_front\frame_0029.png
+      Done - images saved to C:\Users\jarja\OneDrive - TUM\Engineering Project CAD\Calibrationcamera\images\oak4d_front
+
+      === Calibrating oak4d_front ===
+      Loading images from C:\Users\jarja\OneDrive - TUM\Engineering Project CAD\Calibrationcamera\images\oak4d_front
+      Found 30 images
+      Valid frames: 30  Rejected: 0
+      Reprojection error: 2.4319 px
+      Camera matrix K:
+      [[2.98157920e+03 0.00000000e+00 2.05949685e+03]
+       [0.00000000e+00 2.98513675e+03 1.06524919e+03]
+       [0.00000000e+00 0.00000000e+00 1.00000000e+00]]
+      Distortion: [[ 0.1151311 ]
+       [-0.14635391]
+       [-0.00629995]
+       [ 0.00970178]
+       [ 0.01275872]]
+      Saved to C:\Users\jarja\OneDrive - TUM\Engineering Project CAD\Calibrationcamera\calibration_results\oak4d_front_calib.yaml
+      WARNING: reprojection error > 0.5 - consider capturing more varied images
+    previous_attempts:
+      - run_status: failed
+        attempted_command: 'python "c:/Users/jarja/OneDrive - TUM/Engineering Project CAD/Calibrationcamera/calibrate_oak4d_front.py"'
+        requested_device_info: "DeviceInfo(name=192.168.25.97, deviceId=, X_LINK_ANY_STATE, X_LINK_ANY_PROTOCOL, X_LINK_ANY_PLATFORM, X_LINK_SUCCESS)"
+        requested_ip: "192.168.25.97"
+        failure:
+          reason: "Device not found"
+          exception_type: "RuntimeError"
+          exception_message: "Cannot find any device with given deviceInfo"
+          source_file: "intrinsic_calibration_core.py"
+          source_line: 420
+        raw_console_log: |
+          PS C:\Users\jarja> & C:/Users/jarja/AppData/Local/Programs/Python/Python313/python.exe "c:/Users/jarja/OneDrive - TUM/Engineering Project CAD/Calibrationcamera/calibrate_oak4d_front.py"
+          Opening OAK4D Pro device: DeviceInfo(name=192.168.25.97, deviceId=, X_LINK_ANY_STATE, X_LINK_ANY_PROTOCOL, X_LINK_ANY_PLATFORM, X_LINK_SUCCESS)
+          [2026-06-02 16:29:03.406] [host] [error] Searched, but no actual device found by given DeviceInfo: DeviceInfo(name=192.168.25.97, deviceId=, X_LINK_ANY_STATE, X_LINK_ANY_PROTOCOL, X_LINK_ANY_PLATFORM, X_LINK_SUCCESS)
+          RuntimeError: Cannot find any device with given deviceInfo
+  intel_back:
+    run_status: completed
+    device:
+      type: "Intel RealSense"
+    image_dir: "images/intel_back"
+    output_file: "calibration_results/intel_back_intrinsics.yaml"
+    calibration_model: "plumb_bob"
+    fisheye_model: false
+    reprojection_error_px: null
+    camera_matrix:
+      rows: 3
+      cols: 3
+      data:
+        - [1350.82417, 0.0, 700.141084]
+        - [0.0, 1186.39138, 550.032811]
+        - [0.0, 0.0, 1.0]
+    dist_coeffs:
+      rows: 5
+      cols: 1
+      data: [-0.51555853, 3.76941572, -0.08537841, 0.10720551, -5.47742185]
+    useful_info:
+      fx_px: 1350.82417
+      fy_px: 1186.39138
+      cx_px: 700.141084
+      cy_px: 550.032811
+    raw_console_log: |
+      intel_back: K =
+      [[1.35082417e+03 0.00000000e+00 7.00141084e+02]
+       [0.00000000e+00 1.18639138e+03 5.50032811e+02]
+       [0.00000000e+00 0.00000000e+00 1.00000000e+00]]
+      intel_back: distortion = [[-0.51555853]
+       [ 3.76941572]
+       [-0.08537841]
+       [ 0.10720551]
+       [-5.47742185]]
+  oaklite_back:
+    run_status: completed
+    device:
+      type: "OAK-Lite"
+    image_dir: "images/oaklite_back"
+    output_file: "calibration_results/oaklite_back_intrinsics.yaml"
+    calibration_model: "plumb_bob"
+    fisheye_model: false
+    reprojection_error_px: 0.6797
+    camera_matrix:
+      rows: 3
+      cols: 3
+      data:
+        - [1566.86758, 0.0, 346.070189]
+        - [0.0, 788.747890, 221.822264]
+        - [0.0, 0.0, 1.0]
+    dist_coeffs:
+      rows: 5
+      cols: 1
+      data: [-0.28422675, -1.08296433, 0.09302819, -0.04634555, 9.7096874]
+    useful_info:
+      fx_px: 1566.86758
+      fy_px: 788.747890
+      cx_px: 346.070189
+      cy_px: 221.822264
+      quality_warning: "Reprojection error > 0.5 px; consider capturing more varied images."
+    raw_console_log: |
+      oaklite_back: reprojection error 0.6797 px
+      oaklite_back: K =
+      [[1.56686758e+03 0.00000000e+00 3.46070189e+02]
+       [0.00000000e+00 7.88747890e+02 2.21822264e+02]
+       [0.00000000e+00 0.00000000e+00 1.00000000e+00]]
+      oaklite_back: distortion = [[-0.28422675]
+       [-1.08296433]
+       [ 0.09302819]
+       [-0.04634555]
+       [ 9.7096874 ]]
+  oak1_back:
+    run_status: completed
+    device:
+      type: "OAK-1"
+    image_dir: "images/oak1_back"
+    output_file: "calibration_results/oak1_back_intrinsics.yaml"
+    calibration_model: "plumb_bob"
+    fisheye_model: false
+    reprojection_error_px: 3.2550
+    camera_matrix:
+      rows: 3
+      cols: 3
+      data:
+        - [1779.49825, 0.0, 1869.74565]
+        - [0.0, 1752.99503, 1125.48922]
+        - [0.0, 0.0, 1.0]
+    dist_coeffs:
+      rows: 5
+      cols: 1
+      data: [0.1216308, -0.1420538, -0.00282312, 0.00648972, 0.01977908]
+    useful_info:
+      fx_px: 1779.49825
+      fy_px: 1752.99503
+      cx_px: 1869.74565
+      cy_px: 1125.48922
+      quality_warning: "Reprojection error > 0.5 px; consider capturing more varied images."
+    raw_console_log: |
+      oak1_back: saved C:\Users\jarja\OneDrive - TUM\Engineering Project CAD\Calibrationcamera\calibration_results\oak1_back_intrinsics.yaml
+      oak1_back: reprojection error 3.2550 px
+      oak1_back: K =
+      [[1.77949825e+03 0.00000000e+00 1.86974565e+03]
+       [0.00000000e+00 1.75299503e+03 1.12548922e+03]
+       [0.00000000e+00 0.00000000e+00 1.00000000e+00]]
+      oak1_back: distortion = [[ 0.1216308 ]
+       [-0.1420538 ]
+       [-0.00282312]
+       [ 0.00648972]
+       [ 0.01977908]]
