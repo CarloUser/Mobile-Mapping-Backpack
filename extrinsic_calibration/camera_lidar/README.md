@@ -21,7 +21,7 @@ Read `CONTEXT.md` for the full method and geometry; this README is operational.
    CONTEXT.md §7 — check with `ros2 topic list` while drivers run. Measure the
    printed board and set `board:` exactly (squares, square/marker size,
    dictionary). Camera intrinsics must be good first (`CameraInfo` is used
-   directly); refresh with the scripts in `../../Camera_Calibration_Jakob/` if
+   directly); refresh with the scripts in `../../Camera_Calibration/` if
    needed.
 2. **Record one bag per pair** (camera image + camera_info + that pair's LiDAR
    topic). Hold the board static 3–5 s at 15–25 poses spanning the shared FOV —
