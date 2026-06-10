@@ -59,8 +59,22 @@ def generate_launch_description():
         ),
     ])
 
+    # Insta360 (omni hub camera) — driver node only: it publishes the
+    # H.264-compressed dual-fisheye stream (/dual_fisheye/image/compressed)
+    # + raw IMU, which is exactly what we record. The decoder /
+    # equirectangular / Madgwick nodes from the driver's own
+    # bringup.launch.xml are offline-processing tools; keeping them out of
+    # the recording session saves Jetson CPU.
+    insta360_node = Node(
+        package='insta360_ros_driver',
+        executable='insta360_ros_driver',
+        name='insta360_ros_driver',
+        output='log',
+    )
+
     return LaunchDescription([
         oak4d_group,
         oakd_lite_group,
         realsense_group,
+        insta360_node,
     ])

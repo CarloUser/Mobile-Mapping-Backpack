@@ -44,31 +44,35 @@ chronyc tracking
 
 ## 2. LiDAR Time Synchronization
 
-The JT128 can act as a **PTP slave**, disciplining its internal clock to a PTP
-master on the network. The Jetson can serve as the master using `linuxptp`.
-Configure the Livox Avia with the best supported sync mode available in the
-driver/hardware setup, then verify its PointCloud2 header stamps against the
-same system time.
+**Both LiDARs support IEEE 1588v2 PTP slave mode**, so one `ptp4l` master on
+the Jetson's LiDAR Ethernet interface disciplines both:
+
+- **HESAI JT128**: PTP slave, enabled in its web UI (below).
+- **Livox Avia**: supports PTP / GPS / PPS with priority **PTP > GPS > PPS**
+  (per the Livox device time-synchronization manual). With a PTP master on the
+  network it synchronizes automatically — no driver configuration needed.
+  Without it, the Avia free-runs on its power-on clock (we measured the
+  resulting offset at ~1.78e9 s with +12 ppm drift on the 2026-06-09 bag).
+
+Everything in this section is automated by **`bash/setup_time_sync.sh`** (run
+once with sudo; installs chrony + linuxptp, deploys the config below, and
+installs systemd units `mmb-ptp4l` / `mmb-phc2sys` so the stack survives
+reboots):
 
 ```bash
-sudo apt install -y linuxptp
+sudo bash bash/setup_time_sync.sh eth0    # use your LiDAR interface (ip link)
 ```
 
-Identify the Ethernet interface connected to the LiDAR network:
-```bash
-ip link   # e.g., eth0 or enp3s0
-```
+Manual equivalent, for reference:
 
-Start `ptp4l` as master on that interface:
 ```bash
-sudo ptp4l -i eth0 -m -s    # -m = master, -s = software timestamping
-# For hardware timestamping (preferred if NIC supports it):
-sudo ptp4l -i eth0 -m -H
-```
-
-Sync the system clock to PTP time:
-```bash
-sudo phc2sys -a -rr -s CLOCK_REALTIME -m
+sudo apt install -y linuxptp ethtool
+ethtool -T eth0                      # check for hardware-transmit timestamping
+sudo ptp4l -i eth0 --masterOnly 1 -m       # hardware timestamping
+sudo ptp4l -i eth0 --masterOnly 1 -S -m    # software timestamping fallback
+# Hardware mode only: keep the NIC PHC following the system clock so PTP time
+# on the wire equals system/UTC time:
+sudo phc2sys -c eth0 -s CLOCK_REALTIME -O 0 -m
 ```
 
 **Configure the HESAI**: Open the JT128 web interface at `http://192.168.1.201`,
@@ -119,6 +123,19 @@ chrony sync issue.
 # Quick sanity check
 chronyc tracking | grep "System time"
 ```
+
+**Recorded-bag audit (the authoritative check):** every bag can be verified
+offline, per topic, with
+
+```bash
+python3 evaluation/check_time_sync.py --bag <bag_dir>
+```
+
+It reports each topic's rate, median header-vs-receive offset, jitter, and
+clock drift (ppm), with PASS/FAIL verdicts. A large but stable offset means a
+sensor is on its own clock epoch (fix = PTP, or carry the printed median as a
+post-hoc correction); nonzero drift means a free-running oscillator — sync it,
+don't just subtract a constant on long recordings.
 
 ---
 

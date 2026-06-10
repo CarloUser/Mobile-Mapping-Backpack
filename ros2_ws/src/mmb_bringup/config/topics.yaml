@@ -1,28 +1,36 @@
-# Topics recorded by recording.launch.py
-# Edit this list to add/remove topics as the sensor setup evolves.
+# Topics recorded by recording.launch.py / bash/record_all.sh.
+# recording.launch.py reads this file at launch time — this is the single
+# source of truth; do not duplicate the list elsewhere.
 # Estimated aggregate bandwidth at full rate: ~1.5-2 GB/min.
 
 topics:
   # LiDARs
   - /lidar_points                         # HESAI JT128 PointCloud2, ~10 Hz
-  - /livox/lidar                          # Livox Avia PointCloud2
-  - /livox/imu                            # Livox Avia IMU
+  - /lidar_imu                            # HESAI built-in IMU, ~420 Hz (used by lidar_lidar calib)
+  - /livox/lidar                          # Livox Avia, livox_interfaces/CustomMsg (per-point time; FAST-LIO needs this format)
+  - /livox/imu                            # Livox Avia IMU, ~200 Hz
 
-  # OAK-4D Luxonis
+  # OAK-4D Luxonis (front)
   - /oak4d/rgb/image_raw                  # Image, 30 Hz
   - /oak4d/depth/image_raw                # Image, 30 Hz
   - /oak4d/rgb/camera_info
   - /oak4d/imu/data                       # Imu, ~500 Hz
 
-  # OAK-D Lite Luxonis
+  # OAK-D Lite Luxonis (rear)
   - /oakd_lite/rgb/image_raw              # Image, 30 Hz
   - /oakd_lite/depth/image_raw            # Image, 30 Hz
   - /oakd_lite/rgb/camera_info
 
-  # Intel RealSense
+  # Intel RealSense (rear)
   - /realsense/color/image_raw            # Image, 30 Hz
   - /realsense/depth/image_rect_raw       # Image, 30 Hz
   - /realsense/color/camera_info
+
+  # Insta360 (omni hub camera) — driver publishes H.264-compressed dual
+  # fisheye; record the compressed stream and decode offline with the
+  # driver's `decoder` / `equirectangular` nodes when processing.
+  - /dual_fisheye/image/compressed
+  - /imu/data_raw                         # Insta360 6-DOF IMU (pre-Madgwick filter)
 
   # Xsens MTi-610R IMU
   - /imu/data                             # Imu, 400 Hz
@@ -30,15 +38,14 @@ topics:
 
   # u-blox GNSS
   - /gnss/fix                             # NavSatFix, 5-10 Hz
-  - /gnss/fix_velocity                    # TwistWithCovarianceStamped, 5-10 Hz
+  - /gnss/fix_velocity                    # TwistWithCovarianceStamped
 
-  # TF tree - essential for extrinsic calibration replay
+  # TF tree — essential for extrinsic calibration replay
   - /tf
   - /tf_static
 
-# Bandwidth reduction options (uncomment if storage is a bottleneck):
-# Replace uncompressed image topics above with compressed equivalents:
+# Bandwidth reduction options (uncomment in place of the *_raw topics if
+# storage is the bottleneck). Depth images do not compress well; keep raw.
 #   - /oak4d/rgb/image_raw/compressed
 #   - /oakd_lite/rgb/image_raw/compressed
 #   - /realsense/color/image_raw/compressed
-# Note: depth images do not compress well; keep them uncompressed.
