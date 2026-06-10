@@ -1,0 +1,6 @@
+numpy
+scipy
+pyyaml
+rosbags
+opencv-contrib-python>=4.7   # cv2.aruco.CharucoDetector API
+pytest                       # tests only

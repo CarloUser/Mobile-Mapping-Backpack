@@ -1,0 +1,91 @@
+# Camera <-> LiDAR calibration config.
+# CONFIRM topic names with `ros2 topic list` while the drivers run — the names
+# below follow CONTEXT.md section 7 and are placeholders until verified.
+
+ros_distro: humble
+
+board:
+  # Measure the PRINTED board, not the design file: long side of one square in
+  # meters. Record dictionary + sizes on the physical board itself.
+  squares_x: 7
+  squares_y: 5
+  square_len_m: 0.10
+  marker_len_m: 0.075
+  dictionary: DICT_5X5_100
+  min_corners: 8           # discard detections with fewer ChArUco corners
+  max_reproj_err_px: 1.5   # discard detections that reproject worse than this
+
+# Static-hold extraction: a "hold" is >= min_hold_s of consecutive detections
+# whose board pose stays within the motion thresholds (the recording protocol
+# holds the board still 3-5 s per pose).
+holds:
+  image_stride: 3          # process every Nth image (detection is the slow part)
+  min_hold_s: 1.5
+  max_gap_s: 0.6           # tolerated detection dropouts inside a hold
+  max_rot_deg: 1.5         # motion within a hold vs the hold's median pose
+  max_trans_m: 0.02
+
+lidar:
+  # Cloud accumulated over [t_hold_center +- half_window]; the Livox's
+  # non-repetitive pattern needs ~1 s to densify, the Hesai needs one scan.
+  half_window_s: 0.5
+  crop_margin_m: 0.35      # crop radius = board half-diagonal + this margin,
+                           # around the CAD-predicted board centre
+  ransac_dist_m: 0.02
+  ransac_iters: 500
+  min_inliers: 60
+  max_extent_margin_m: 0.30  # reject patches larger than board size + this (walls)
+  max_normal_vs_cad_deg: 30  # reject patches whose normal disagrees with the
+                             # CAD-predicted board normal by more than this
+
+solve:
+  min_poses: 6
+  min_normal_spread: 0.10
+  refine: true
+
+paths:
+  initial_extrinsics: ../../ros2_ws/src/mmb_bringup/config/extrinsics_initial.yaml
+  # Merge target. Existing calibrated entries (e.g. lidar_livox_avia from the
+  # lidar_lidar stage) are preserved.
+  output_extrinsics: ../../ros2_ws/src/mmb_bringup/config/extrinsics_calibrated.yaml
+
+# One entry per camera<->LiDAR pair. `lidar_frame` decides the chaining:
+#   lidar_hesai      -> T_base_cam = T_base_hesai(CAD)        @ inv(T_cam_lidar)
+#   lidar_livox_avia -> T_base_cam = T_base_livox(CALIBRATED) @ inv(T_cam_lidar)
+# so rear cameras inherit the lidar_lidar result automatically.
+pairs:
+  oak4d:
+    camera_frame: camera_oak4d
+    lidar_frame: lidar_hesai
+    image_topic: /oak4d/rgb/image_raw
+    camera_info_topic: /oak4d/rgb/camera_info
+    lidar_topic: /lidar_points
+    camera_model: pinhole
+  oak1:
+    camera_frame: camera_oak1
+    lidar_frame: lidar_livox_avia
+    image_topic: /oak1/rgb/image_raw
+    camera_info_topic: /oak1/rgb/camera_info
+    lidar_topic: /livox/lidar
+    camera_model: pinhole
+  oakd_lite:
+    camera_frame: camera_oakd_lite
+    lidar_frame: lidar_livox_avia
+    image_topic: /oakd_lite/rgb/image_raw
+    camera_info_topic: /oakd_lite/rgb/camera_info
+    lidar_topic: /livox/lidar
+    camera_model: pinhole
+  realsense:
+    camera_frame: camera_realsense
+    lidar_frame: lidar_livox_avia
+    image_topic: /realsense/color/image_raw
+    camera_info_topic: /realsense/color/camera_info
+    lidar_topic: /livox/lidar
+    camera_model: pinhole
+  insta360:
+    camera_frame: camera_insta360
+    lidar_frame: lidar_hesai
+    image_topic: /insta360/image_raw     # CONFIRM: driver topic + image format
+    camera_info_topic: /insta360/camera_info
+    lidar_topic: /lidar_points
+    camera_model: fisheye                # dual-fisheye/equirect needs confirming
