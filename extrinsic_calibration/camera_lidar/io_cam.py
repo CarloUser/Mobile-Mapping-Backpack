@@ -226,11 +226,14 @@ def update_calibrated_extrinsics(out_path, initial_path, updates, provenance):
                 entry["note"] = "CAD initial estimate (not refined yet)"
         out["transforms"].append(entry)
 
+    # Serialize BEFORE opening the file: a dump error must not leave a
+    # truncated YAML behind (it is the merge base of the next stage).
+    body = yaml.safe_dump(out, sort_keys=False, default_flow_style=None)
     with open(out_path, "w") as f:
         f.write("# Calibrated sensor extrinsics. Updated by "
-                "extrinsic_calibration/camera_lidar.\n")
+                "extrinsic_calibration.\n")
         f.write("# Entries with calibrated: true were refined; others are CAD "
                 "initial values.\n")
         f.write("# Do NOT overwrite extrinsics_initial.yaml or "
                 "coordinate_systems.yaml.\n\n")
-        yaml.safe_dump(out, f, sort_keys=False, default_flow_style=None)
+        f.write(body)
