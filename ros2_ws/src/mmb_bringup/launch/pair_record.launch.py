@@ -43,18 +43,19 @@ def _depthai(ns, model, pipeline):
 
 
 def _oak4d_v3():
-    # OAK-4D is RVC4/PoE -> the v2 depthai_ros_driver can't drive it. Use the
-    # official depthai_ros_driver_v3 (>= 3.3.0; 3.2.1 SIGSEGVs vs core 3.7.1).
-    # Run driver_node directly as a plain Node (the composable-container
-    # driver.launch.py does not come up when nested in this launch). Node name
-    # 'oak4d' (no namespace) -> the driver publishes /oak4d/rgb/image_raw +
-    # /oak4d/rgb/camera_info, as config.yaml expects. Params (device id + RGB
-    # pipeline) in config/oak4d_v3.yaml. The missing oak4d_state_publisher only
-    # costs the camera's internal URDF TF, which calibration does not use.
-    params = os.path.join(get_package_share_directory('mmb_bringup'),
-                          'config', 'oak4d_v3.yaml')
-    return Node(package='depthai_ros_driver_v3', executable='driver_node',
-                name='oak4d', output='screen', parameters=[params])
+    # OAK-4D is RVC4/PoE. The official depthai_ros_driver_v3 connects but does
+    # NOT honor rgb.i_fps/i_width/i_height overrides via the plain-node path, so
+    # it is stuck at 640x400@30 — too low for reliable ChArUco board detection.
+    # Use our minimal depthai-v3 publisher instead (scripts/oak4d_v3_publisher.py),
+    # which sets resolution + fps directly. 1280x720 @ 10 fps: enough for the
+    # board, matches the Hesai rate, ~28 MB/s over PoE. Publishes
+    # /oak4d/rgb/image_raw + /oak4d/rgb/camera_info (from on-device calibration).
+    script = os.path.join(get_package_share_directory('mmb_bringup'),
+                          'scripts', 'oak4d_v3_publisher.py')
+    return ExecuteProcess(
+        cmd=['python3', script, '--device-id', '1707542538', '--ns', 'oak4d',
+             '--width', '1280', '--height', '720', '--fps', '10'],
+        output='screen')
 
 
 def _realsense():
