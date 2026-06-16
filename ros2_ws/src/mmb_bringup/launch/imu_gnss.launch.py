@@ -7,8 +7,8 @@ def generate_launch_description():
     # Adjust port to match what shows up on the Jetson (/dev/ttyUSB0 or /dev/ttyACM0)
     xsens_node = Node(
         package='xsens_mti_ros2_driver',
-        executable='xsens_mti_ros2_driver_node',
-        name='xsens_mti_ros2_driver_node',
+        executable='xsens_mti_node',
+        name='xsens_mti_node',
         output='screen',
         parameters=[{
             'port': '/dev/ttyUSB0',
@@ -38,7 +38,7 @@ def generate_launch_description():
             'frame_id': 'gnss_antenna',
             'baud': 115200,
             'config_on_startup': False,   # set True once you have a custom config file
-            'rate': 5,
+            'rate': 5.0,
         }],
         remappings=[
             ('fix', '/gnss/fix'),

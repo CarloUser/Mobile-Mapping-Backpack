@@ -10,26 +10,21 @@ topics:
   - /livox/lidar                          # Livox Avia, livox_interfaces/CustomMsg (per-point time; FAST-LIO needs this format)
   - /livox/imu                            # Livox Avia IMU, ~200 Hz
 
-  # OAK-4D Luxonis (front)
+  # OAK-4D Luxonis (front) — RGB only
   - /oak4d/rgb/image_raw                  # Image, 30 Hz
-  - /oak4d/depth/image_raw                # Image, 30 Hz
   - /oak4d/rgb/camera_info
   - /oak4d/imu/data                       # Imu, ~500 Hz
 
-  # OAK-D Lite Luxonis (rear)
+  # OAK-D Lite Luxonis (rear) — RGB only
   - /oakd_lite/rgb/image_raw              # Image, 30 Hz
-  - /oakd_lite/depth/image_raw            # Image, 30 Hz
   - /oakd_lite/rgb/camera_info
 
-  # OAK-1 Luxonis (rear, single 4K RGB — no depth)
-  # NOTE: topic names follow the oakd_lite convention but were not confirmed
-  # against a live device — verify with `ros2 topic list` once OAK-1 is plugged.
+  # OAK-1 Luxonis (rear, single RGB — no depth)
   - /oak1/rgb/image_raw                   # Image, 30 Hz
   - /oak1/rgb/camera_info
 
-  # Intel RealSense (rear)
+  # Intel RealSense (rear) — RGB (color) only
   - /realsense/color/image_raw            # Image, 30 Hz
-  - /realsense/depth/image_rect_raw       # Image, 30 Hz
   - /realsense/color/camera_info
 
   # Insta360 (omni hub camera) — driver publishes H.264-compressed dual
