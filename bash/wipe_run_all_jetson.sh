@@ -7,10 +7,13 @@ ROS_DISTRO="${ROS_DISTRO:-humble}"
 ASSUME_YES=false
 DRY_RUN=false
 
+<<<<<<< HEAD
 # run_all_jetson.sh installs a few common tools that may have existed before the
 # backpack setup. Keep them by default; set true for a stricter wipe test.
 WIPE_SHARED_DEPS="${WIPE_SHARED_DEPS:-false}"
 
+=======
+>>>>>>> 5bf2c79 (fix wipe)
 for arg in "$@"; do
     case "$arg" in
         -y|--yes)
@@ -28,9 +31,12 @@ by bash/run_all_jetson.sh so the Jetson setup can be tested from a clean state.
 
 Environment:
   ROS_DISTRO=humble          ROS distribution to wipe.
+<<<<<<< HEAD
   WIPE_SHARED_DEPS=false     Also purge generic packages installed by setup
                              scripts, such as git, cmake, curl, unzip, tar,
                              locales, and build-essential.
+=======
+>>>>>>> 5bf2c79 (fix wipe)
 EOF
             exit 0
             ;;
@@ -205,7 +211,10 @@ need_sudo
 
 step "Mobile Mapping Backpack Jetson wipe"
 echo "ROS_DISTRO=$ROS_DISTRO"
+<<<<<<< HEAD
 echo "WIPE_SHARED_DEPS=$WIPE_SHARED_DEPS"
+=======
+>>>>>>> 5bf2c79 (fix wipe)
 echo "DRY_RUN=$DRY_RUN"
 
 # setup_ros2_humble.sh and setup_depthai_v3_auto.sh
@@ -221,6 +230,7 @@ purge_installed "RealSense SDK" \
 
 # jetson_libopencv.sh
 purge_installed "Jetson/OpenCV packages" \
+<<<<<<< HEAD
     "nvidia-opencv*" \
     "libopencv*" \
     "opencv-data" \
@@ -237,6 +247,19 @@ purge_installed "sensor-specific dependencies" \
     "libusb-1.0-0-dev" \
     "libyaml-cpp-dev" \
     "python3-rosdep" \
+=======
+    "nvidia-opencv*"
+
+# Do not purge generic Ubuntu dependency packages here. Several setup scripts
+# install packages such as libusb, libpcl, libssl, cmake, git, unzip, and curl,
+# but those may have existed before the backpack setup.
+#
+# Keep the wipe focused on stack-specific apt packages plus files/directories
+# that run_all_jetson.sh creates.
+
+# ROS packages installed directly by run_all_jetson.sh setup scripts.
+purge_installed "sensor ROS packages" \
+>>>>>>> 5bf2c79 (fix wipe)
     "ros-${ROS_DISTRO}-camera-info-manager" \
     "ros-${ROS_DISTRO}-cv-bridge" \
     "ros-${ROS_DISTRO}-depthai*" \
@@ -249,6 +272,7 @@ purge_installed "sensor-specific dependencies" \
     "ros-${ROS_DISTRO}-tf2-geometry-msgs" \
     "ros-${ROS_DISTRO}-tf2-ros"
 
+<<<<<<< HEAD
 if [ "$WIPE_SHARED_DEPS" = true ]; then
     purge_installed "shared build/setup tools installed by run_all_jetson.sh" \
         "build-essential" \
@@ -264,6 +288,8 @@ else
     echo "Skipping shared build/setup tools because WIPE_SHARED_DEPS=false."
 fi
 
+=======
+>>>>>>> 5bf2c79 (fix wipe)
 remove_paths "home workspaces and SDK directories" \
     "$HOME/ros2_ws" \
     "$HOME/ros_ws" \
@@ -278,12 +304,17 @@ remove_sudo_paths "udev rules installed by setup/config scripts" \
     "/etc/udev/rules.d/99-insta.rules"
 
 remove_sudo_paths "ROS apt source and rosdep files" \
+<<<<<<< HEAD
     "/etc/apt/sources.list.d/ros2.list" \
     "/etc/apt/sources.list.d/ros2.sources" \
     "/etc/apt/sources.list.d/ros-latest.list" \
     "/etc/ros" \
     "/usr/share/keyrings/ros-archive-keyring.gpg" \
     "/etc/apt/trusted.gpg.d/ros-archive-keyring.gpg" \
+=======
+    "/etc/apt/sources.list.d/ros2.sources" \
+    "/etc/ros" \
+>>>>>>> 5bf2c79 (fix wipe)
     "/tmp/ros2-apt-source.deb"
 
 remove_sudo_paths "OpenCV files touched by Jetson setup" \
