@@ -1,67 +1,52 @@
-# Initial sensor extrinsics from the SolidWorks coordinate-system export.
-# Source: Coordinate_systems/coordinate_systems.yaml
-#
-# These are CAD estimates, not calibrated results. Use them to initialize TF and
-# downstream calibration tools, then write refined values to a separate calibrated
-# extrinsics file.
 reference_frame: base_link
-units:
-  translation: meters
-  rotation: quaternion_xyzw
-
+units: {translation: meters, rotation: quaternion_xyzw}
 transforms:
-  - source_frame: Oak_4
-    parent: base_link
-    child: camera_oak4d
-    xyz: [9.26604120012522E-03, 4.022890058414E-02, -4.87610765723726E-02]
-    q_xyzw: [0.0, 0.0, 0.0, 1.0]
-
-  - source_frame: GNSS_Antenna
-    parent: base_link
-    child: gnss_antenna
-    xyz: [7.40394746195187E-03, 1.21672119427252E-01, 9.52111214036253E-02]
-    q_xyzw: [0.0, 0.0, 0.0, 1.0]
-    note: GNSS rotation is not physically meaningful for a single antenna; translation is the lever arm.
-
-  - source_frame: Livox_Avia
-    parent: base_link
-    child: lidar_livox_avia
-    xyz: [6.15953452791859E-03, -2.61595830828822E-02, -6.39745409273749E-02]
-    q_xyzw: [-3.49148133884313E-15, -3.49148133884313E-15, 1.0, -1.21904419394898E-29]
-
-  - source_frame: Hesai
-    parent: base_link
-    child: lidar_hesai
-    xyz: [8.25335383692801E-03, 5.07170454616155E-02, 9.65158453101299E-02]
-    q_xyzw: [-7.07106781186549E-01, 0.0, 0.0, 7.07106781186546E-01]
-
-  - source_frame: Intel_Realsense
-    parent: base_link
-    child: camera_realsense
-    xyz: [-5.00226269231557E-02, 1.06536011222252E-01, 9.51690299822231E-02]
-    q_xyzw: [-3.49148133884313E-15, -3.49148133884313E-15, 1.0, -1.21904419394898E-29]
-
-  - source_frame: Oak_4_light
-    parent: base_link
-    child: camera_oakd_lite
-    xyz: [-4.76411677891182E-02, 1.13285974499897E-01, -7.604038256127E-02]
-    q_xyzw: [0.0, 1.0, 0.0, 3.49148133884313E-15]
-    note: Confirm that SolidWorks frame Oak_4_light is the OAK-D Lite before calibration.
-
-  - source_frame: Oak_1
-    parent: base_link
-    child: camera_oak1
-    xyz: [-5.2987960674065E-02, 1.17585651088969E-01, 9.42191946353569E-03]
-    q_xyzw: [0.0, 1.0, 0.0, 3.49148133884313E-15]
-
-  - source_frame: Xsens_IMU
-    parent: base_link
-    child: imu_xsens
-    xyz: [2.93007514840342E-03, 9.81721194272516E-02, -9.92596717526523E-02]
-    q_xyzw: [0.0, 0.0, 0.0, 1.0]
-
-  - source_frame: Insta_360
-    parent: base_link
-    child: camera_insta360
-    xyz: [1.393353836928E-03, 2.73672119427252E-01, -8.52001287943149E-03]
-    q_xyzw: [0.0, 0.0, 0.0, 1.0]
+- source_frame: Oak_4
+  parent: base_link
+  child: camera_oak4d
+  xyz: [0.00926604120012522, 0.04022890058414, -0.0487610765723726]
+  q_xyzw: [0.5, -0.5, 0.5, -0.5]
+  note: forward-facing optical-frame seed (was identity placeholder)
+- source_frame: GNSS_Antenna
+  parent: base_link
+  child: gnss_antenna
+  xyz: [0.00740394746195187, 0.121672119427252, 0.0952111214036253]
+  q_xyzw: [0.0, 0.0, 0.0, 1.0]
+  note: GNSS rotation is not physically meaningful for a single antenna; translation
+    is the lever arm.
+- source_frame: Livox_Avia
+  parent: base_link
+  child: lidar_livox_avia
+  xyz: [0.00615953452791859, -0.0261595830828822, -0.0639745409273749]
+  q_xyzw: [-3.49148133884313e-15, -3.49148133884313e-15, 1.0, -1.21904419394898e-29]
+- source_frame: Hesai
+  parent: base_link
+  child: lidar_hesai
+  xyz: [0.00825335383692801, 0.0507170454616155, 0.0965158453101299]
+  q_xyzw: [-0.707106781186549, 0.0, 0.0, 0.707106781186546]
+- source_frame: Intel_Realsense
+  parent: base_link
+  child: camera_realsense
+  xyz: [-0.0500226269231557, 0.106536011222252, 0.0951690299822231]
+  q_xyzw: [-3.49148133884313e-15, -3.49148133884313e-15, 1.0, -1.21904419394898e-29]
+- source_frame: Oak_4_light
+  parent: base_link
+  child: camera_oakd_lite
+  xyz: [-0.0476411677891182, 0.113285974499897, -0.07604038256127]
+  q_xyzw: [0.0, 1.0, 0.0, 3.49148133884313e-15]
+  note: Confirm that SolidWorks frame Oak_4_light is the OAK-D Lite before calibration.
+- source_frame: Oak_1
+  parent: base_link
+  child: camera_oak1
+  xyz: [-0.052987960674065, 0.117585651088969, 0.00942191946353569]
+  q_xyzw: [0.0, 1.0, 0.0, 3.49148133884313e-15]
+- source_frame: Xsens_IMU
+  parent: base_link
+  child: imu_xsens
+  xyz: [0.00293007514840342, 0.0981721194272516, -0.0992596717526523]
+  q_xyzw: [0.0, 0.0, 0.0, 1.0]
+- source_frame: Insta_360
+  parent: base_link
+  child: camera_insta360
+  xyz: [0.001393353836928, 0.273672119427252, -0.00852001287943149]
+  q_xyzw: [0.0, 0.0, 0.0, 1.0]

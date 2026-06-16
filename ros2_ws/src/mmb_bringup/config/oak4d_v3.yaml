@@ -16,3 +16,7 @@
     pipeline_gen:
       i_nn_type: none
       i_pipeline_type: RGB
+    rgb:
+      i_fps: 10.0       # match the Hesai (~10 Hz); avoids wasted frames
+      i_width: 1920     # default was 640x400 (too low for ChArUco); 1080p over
+      i_height: 1080    # PoE at 10 fps ~60 MB/s, well within 1GbE

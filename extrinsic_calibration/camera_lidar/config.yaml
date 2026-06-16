@@ -21,7 +21,7 @@ board:
 # whose board pose stays within the motion thresholds (the recording protocol
 # holds the board still 3-5 s per pose).
 holds:
-  image_stride: 3          # process every Nth image (detection is the slow part)
+  image_stride: 2          # official driver ~10 fps -> every 2nd frame (~5 fps) is plenty
   min_hold_s: 1.5
   max_gap_s: 0.6           # tolerated detection dropouts inside a hold
   max_rot_deg: 1.5         # motion within a hold vs the hold's median pose
@@ -37,8 +37,9 @@ lidar:
   ransac_iters: 500
   min_inliers: 60
   max_extent_margin_m: 0.30  # reject patches larger than board size + this (walls)
-  max_normal_vs_cad_deg: 30  # reject patches whose normal disagrees with the
-                             # CAD-predicted board normal by more than this
+  max_normal_vs_cad_deg: 70  # loosened: the OAK-4D CAD seed is rough (~50 deg),
+                             # so widen the sanity gate; the solve is data-driven.
+                             # Tighten once a solved extrinsic replaces the seed.
 
 solve:
   min_poses: 6
