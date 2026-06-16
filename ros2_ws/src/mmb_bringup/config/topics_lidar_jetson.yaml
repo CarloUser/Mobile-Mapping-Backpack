@@ -1,0 +1,28 @@
+# Topics recorded on the LiDAR JETSON (PTP slave; hosts both LiDARs + 1 camera).
+# Read by bash/record_split.sh lidar. See docs/dual_jetson_recording.md.
+#
+# MAPPING PROFILE: cameras provide COLOR (geometry comes from LiDAR), so RGB
+# only — depth images are dropped to halve camera throughput. To assess raw
+# camera quality instead, uncomment the depth/raw lines at the bottom.
+topics:
+  # LiDARs — PTP-locked to the grandmaster (camera Jetson) over the switch
+  - /lidar_points                         # Hesai JT128 PointCloud2, ~10 Hz (heavy)
+  - /lidar_imu                            # Hesai built-in IMU, ~420 Hz
+  - /livox/lidar                          # Livox Avia, livox_interfaces/CustomMsg
+  - /livox/imu                            # Livox Avia IMU, ~200 Hz
+
+  # OAK-4D (front camera co-located with the LiDARs; relieves the camera
+  # Jetson's USB3 bus since the LiDARs are on Ethernet). RGB only.
+  - /oak4d/rgb/image_raw                  # Image, 30 Hz
+  - /oak4d/rgb/camera_info
+
+  # TF — needed for calibration/mapping replay
+  - /tf
+  - /tf_static
+
+# Throughput options:
+#   - swap /oak4d/rgb/image_raw -> /oak4d/rgb/image_raw/compressed (needs
+#     image_transport plugins; confirm the topic exists with `ros2 topic list`)
+# Raw-quality assessment (heavier):
+#   - /oak4d/depth/image_raw
+#   - /oak4d/imu/data

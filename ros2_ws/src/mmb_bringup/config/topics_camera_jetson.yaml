@@ -1,0 +1,40 @@
+# Topics recorded on the CAMERA JETSON (PTP grandmaster; hosts the remaining
+# cameras + IMU + GNSS). Read by bash/record_split.sh camera.
+# See docs/dual_jetson_recording.md.
+#
+# MAPPING PROFILE: RGB only (depth dropped). This Jetson carries 4 cameras on
+# USB3 — if check_dual_sync.py shows dropped frames, switch the OAK/RealSense
+# topics to their /compressed variants (see bottom).
+topics:
+  # OAK-1 (rear, 4K RGB — no depth on this device)
+  - /oak1/rgb/image_raw
+  - /oak1/rgb/camera_info
+
+  # OAK-D Lite (rear) — RGB only
+  - /oakd_lite/rgb/image_raw
+  - /oakd_lite/rgb/camera_info
+
+  # Intel RealSense (rear) — color only
+  - /realsense/color/image_raw
+  - /realsense/color/camera_info
+
+  # Insta360 — H.264 dual fisheye (already compressed) + raw IMU
+  - /dual_fisheye/image/compressed
+  - /imu/data_raw
+
+  # Xsens MTi-610R IMU
+  - /imu/data                             # Imu, 400 Hz
+  - /imu/mag                              # MagneticField, 100 Hz
+
+  # u-blox GNSS (time-master source for the future GNSS/PPS upgrade)
+  - /gnss/fix
+  - /gnss/fix_velocity
+
+  # TF
+  - /tf
+  - /tf_static
+
+# Throughput options (USB3-bound): replace *_raw with compressed equivalents
+#   - /oak1/rgb/image_raw/compressed
+#   - /oakd_lite/rgb/image_raw/compressed
+#   - /realsense/color/image_raw/compressed
