@@ -44,7 +44,9 @@ if [ ! -f "/opt/ros/${ROS_DISTRO}/setup.bash" ]; then
 fi
 
 # shellcheck disable=SC1090
+set +u  # ROS setup.bash reads unbound vars (AMENT_TRACE_SETUP_FILES) under set -u
 source "/opt/ros/${ROS_DISTRO}/setup.bash"
+set -u
 
 echo "ROS_DISTRO = ${ROS_DISTRO}"
 
@@ -58,7 +60,9 @@ if ! have_cmd ros2; then
     sudo apt update
     sudo apt install -y "${ROS2CLI_PKG}"
     # shellcheck disable=SC1090
-    source "/opt/ros/${ROS_DISTRO}/setup.bash"
+    set +u  # ROS setup.bash reads unbound vars (AMENT_TRACE_SETUP_FILES) under set -u
+source "/opt/ros/${ROS_DISTRO}/setup.bash"
+set -u
 fi
 
 if ! have_cmd ros2; then
@@ -72,6 +76,16 @@ echo "ros2 found: $(command -v ros2)"
 # STEP 3: Fix broken apt/dpkg state
 # -----------------------------
 step "3/9" "Fixing broken apt/dpkg state if needed..."
+
+# Work around an appstreamcli SIGSEGV in APT's update hook: the DEP-11 cache
+# refresh in /etc/apt/apt.conf.d/50appstream crashes on this Ubuntu/Jetson and
+# aborts `apt update`. Disabling that one hook only skips GUI software-catalog
+# metadata; package installs are unaffected. APT ignores *.disabled files, and
+# it is fully reversible (mv back). No-op if already disabled or absent.
+if [ -f /etc/apt/apt.conf.d/50appstream ]; then
+    echo "Disabling crashing appstream APT update hook (50appstream -> .disabled)"
+    sudo mv /etc/apt/apt.conf.d/50appstream /etc/apt/apt.conf.d/50appstream.disabled
+fi
 
 sudo dpkg --configure -a
 sudo apt --fix-broken install -y
@@ -162,7 +176,9 @@ fi
 step "9/9" "Verifying DepthAI v3 installation..."
 
 # shellcheck disable=SC1090
+set +u  # ROS setup.bash reads unbound vars (AMENT_TRACE_SETUP_FILES) under set -u
 source "/opt/ros/${ROS_DISTRO}/setup.bash"
+set -u
 
 echo ""
 echo "DepthAI-related apt packages:"

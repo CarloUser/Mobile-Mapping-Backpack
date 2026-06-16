@@ -1,0 +1,18 @@
+# Params for the OAK-4D (OAK-4-PRO, RVC4 PoE) via depthai_ros_driver_v3.
+# Used by pair_record.launch.py for the oak4d pair. Requires the v3 driver
+# >= 3.3.0 (3.2.1 SIGSEGVs against depthai-core 3.7.1 — see docs/).
+#
+# i_device_id pins THIS unit (id 1707542538 == 192.168.1.97) so discovery is
+# deterministic on the shared LiDAR subnet. If the camera is replaced, update
+# this (find it via: python3 -c "import depthai as dai;
+# print([d.deviceId for d in dai.Device.getAllAvailableDevices()])").
+#
+# RGB-only pipeline: the camera<->LiDAR calibration only needs colour, and RGB
+# avoids the stereo/depth setup (lighter over PoE).
+/**:
+  ros__parameters:
+    driver:
+      i_device_id: "1707542538"
+    pipeline_gen:
+      i_nn_type: none
+      i_pipeline_type: RGB
