@@ -9,6 +9,9 @@ ROS_DISTRO=humble
 WS=$HOME/ros2_ws
 
 echo "[1/7] Source ROS..."
+unset AMENT_PREFIX_PATH
+unset CMAKE_PREFIX_PATH
+unset COLCON_PREFIX_PATH
 source /opt/ros/$ROS_DISTRO/setup.bash
 
 echo "[2/7] Install dependencies..."
@@ -55,6 +58,9 @@ rosdep install --from-paths src --ignore-src -r -y
 
 echo "[7/7] Build depthai-ros v2..."
 rm -rf build install log
+rm -rf build/depthai_examples install/depthai_examples
+rm -rf build/depthai_filters install/depthai_filters
+rm -rf build/depthai_ros_driver install/depthai_ros_driver
 
 echo "[6.5/7] Installing common ROS runtime dependencies..."
 
@@ -70,14 +76,9 @@ sudo apt install -y \
 
 colcon build \
   --symlink-install \
-  --packages-select \
-    depthai \
-    depthai_ros_msgs \
-    depthai_descriptions \
-    depthai_bridge \
-    depthai_examples\
-    depthai_ros_driver \
-    depthai_ros \
+  --packages-skip \
+    depthai_examples \
+    depthai_filters \
   --parallel-workers 1 \
   --cmake-args -Ddepthai_DIR="$DEPTHAI_DIR"
 
