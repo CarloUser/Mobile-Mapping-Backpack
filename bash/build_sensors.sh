@@ -7,19 +7,7 @@ WS="$HOME/ros2_ws"
 source /opt/ros/$ROS_DISTRO/setup.bash
 cd "$WS"
 
-# DepthAI v2 path
-export depthai_DIR="$WS/depthai_install$WS/src/depthai-core/build/install/lib/cmake/depthai"
-
 PACKAGES=(
-    depthai
-    depthai_ros_msgs
-    depthai_descriptions
-    depthai_bridge
-    # depthai_filters      # skipped on Jetson: OpenCV ximgproc issue
-    depthai_ros_driver
-    depthai_ros
-    # depthai_examples     # skipped on Jetson: heavy/RAM issue
-
     insta360_ros_driver
 
     hesai_ros_driver
@@ -49,8 +37,7 @@ for pkg in "${PACKAGES[@]}"; do
     colcon build \
         --packages-select "$pkg" \
         --symlink-install \
-        --parallel-workers 1 \
-        --cmake-args -Ddepthai_DIR="$depthai_DIR"
+        --parallel-workers 1
 
     source install/local_setup.bash 2>/dev/null || true
 done

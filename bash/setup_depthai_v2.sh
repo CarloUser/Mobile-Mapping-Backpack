@@ -70,6 +70,13 @@ sudo apt install -y \
 
 colcon build \
   --symlink-install \
+  --packages-select \
+    depthai \
+    depthai_ros_msgs \
+    depthai_descriptions \
+    depthai_bridge \
+    depthai_ros_driver \
+    depthai_ros \
   --parallel-workers 1 \
   --cmake-args -Ddepthai_DIR="$DEPTHAI_DIR"
 
