@@ -75,6 +75,7 @@ colcon build \
     depthai_ros_msgs \
     depthai_descriptions \
     depthai_bridge \
+    depthai_examples\
     depthai_ros_driver \
     depthai_ros \
   --parallel-workers 1 \
