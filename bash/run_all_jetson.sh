@@ -8,9 +8,9 @@ echo "Mobile Mapping Backpack - Jetson Setup"
 echo "========================================="
 
 SCRIPTS=(
-    "setup_ros2_humble.sh"
-
     "jetson_libopencv.sh"
+
+    "setup_ros2_humble.sh"
 
     "setup_depthai_v2.sh"
     "setup_depthai_v3_auto.sh"
