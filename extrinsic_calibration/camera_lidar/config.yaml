@@ -40,9 +40,13 @@ lidar:
   ransac_iters: 500
   min_inliers: 60
   max_extent_margin_m: 0.30  # reject patches larger than board size + this (walls)
-  max_normal_vs_cad_deg: 70  # loosened: the OAK-4D CAD seed is rough (~50 deg),
-                             # so widen the sanity gate; the solve is data-driven.
-                             # Tighten once a solved extrinsic replaces the seed.
+  max_normal_vs_cad_deg: 30  # reject patches whose normal disagrees with the
+                             # CAD-predicted board normal by more than this.
+                             # NOTE: rig uses CAD/base-aligned part frames, NOT
+                             # ROS optical frames. calibrate_cam_lidar.py treats
+                             # the camera pose as optical (cv2 convention) — that
+                             # mismatch (not the seed) is the real thing to
+                             # reconcile when resuming this calibration.
 
 solve:
   min_poses: 6
