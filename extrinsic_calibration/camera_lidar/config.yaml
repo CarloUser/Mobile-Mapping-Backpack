@@ -31,8 +31,11 @@ lidar:
   # Cloud accumulated over [t_hold_center +- half_window]; the Livox's
   # non-repetitive pattern needs ~1 s to densify, the Hesai needs one scan.
   half_window_s: 0.5
-  crop_margin_m: 0.35      # crop radius = board half-diagonal + this margin,
-                           # around the CAD-predicted board centre
+  crop_margin_m: 0.35      # crop radius = board half-diagonal + this margin.
+                           # NOTE: auto-crop needs a decent camera->base seed;
+                           # OAK-4D seed is ~50 deg rough so the crop mis-centers
+                           # (grabs walls / nothing). Fix the seed or use Koide
+                           # (KOIDE_CROSSCHECK.md) before relying on this.
   ransac_dist_m: 0.02
   ransac_iters: 500
   min_inliers: 60

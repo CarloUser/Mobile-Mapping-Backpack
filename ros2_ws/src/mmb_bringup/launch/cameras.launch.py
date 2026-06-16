@@ -1,25 +1,24 @@
+import os
+from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
 from launch_ros.actions import Node, PushRosNamespace, ComposableNodeContainer
 from launch.actions import GroupAction
 
 
 def generate_launch_description():
-    # OAK-4D Luxonis — uses depthai-ros v3 API
-    # Run under /oak4d namespace so topics don't collide with OAK-D Lite
-    oak4d_group = GroupAction([
-        PushRosNamespace('oak4d'),
-        Node(
-            package='depthai_ros_driver',
-            executable='camera_node',
-            name='camera_node',
-            output='screen',
-            parameters=[{
-                'camera_model': 'OAK-4',
-                'i_pipeline_type': 'RGBD',
-                'i_nn_type': 'none',
-            }],
-        ),
-    ])
+    # OAK-4D (OAK-4-PRO, RVC4 PoE) — MUST use the official depthai_ros_driver_v3
+    # (the v2 depthai_ros_driver cannot drive RVC4). Params (device id + 1080p
+    # @10fps RGB) in config/oak4d_v3.yaml. Plain Node name='oak4d' -> publishes
+    # /oak4d/rgb/image_raw + /oak4d/rgb/camera_info.
+    oak4d_group = Node(
+        package='depthai_ros_driver_v3',
+        executable='driver_node',
+        name='oak4d',
+        output='screen',
+        parameters=[os.path.join(
+            get_package_share_directory('mmb_bringup'),
+            'config', 'oak4d_v3.yaml')],
+    )
 
     # OAK-D Lite — standard depthai-ros
     oakd_lite_group = GroupAction([
