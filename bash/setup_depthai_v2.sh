@@ -56,12 +56,6 @@ cd "$WS"
 rosdep update
 rosdep install --from-paths src --ignore-src -r -y
 
-echo "[7/7] Build depthai-ros v2..."
-rm -rf build install log
-rm -rf build/depthai_examples install/depthai_examples
-rm -rf build/depthai_filters install/depthai_filters
-rm -rf build/depthai_ros_driver install/depthai_ros_driver
-
 echo "[6.5/7] Installing common ROS runtime dependencies..."
 
 sudo apt install -y \
@@ -74,11 +68,21 @@ sudo apt install -y \
   ros-$ROS_DISTRO-tf2-geometry-msgs \
   ros-$ROS_DISTRO-rviz2
 
+echo "[7/7] Build depthai-ros v2..."
+rm -rf build install log
+rm -rf build/depthai_examples install/depthai_examples
+rm -rf build/depthai_filters install/depthai_filters
+rm -rf build/depthai_ros_driver install/depthai_ros_driver
+
+
 colcon build \
   --symlink-install \
-  --packages-skip \
-    depthai_examples \
-    depthai_filters \
+  --packages-select \
+    depthai_ros_msgs \
+    depthai_descriptions \
+    depthai_bridge \
+    depthai_ros_driver \
+    depthai_ros \
   --parallel-workers 1 \
   --cmake-args -Ddepthai_DIR="$DEPTHAI_DIR"
 
