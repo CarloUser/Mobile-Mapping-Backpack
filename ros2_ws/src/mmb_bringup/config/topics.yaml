@@ -21,6 +21,12 @@ topics:
   - /oakd_lite/depth/image_raw            # Image, 30 Hz
   - /oakd_lite/rgb/camera_info
 
+  # OAK-1 Luxonis (rear, single 4K RGB — no depth)
+  # NOTE: topic names follow the oakd_lite convention but were not confirmed
+  # against a live device — verify with `ros2 topic list` once OAK-1 is plugged.
+  - /oak1/rgb/image_raw                   # Image, 30 Hz
+  - /oak1/rgb/camera_info
+
   # Intel RealSense (rear)
   - /realsense/color/image_raw            # Image, 30 Hz
   - /realsense/depth/image_rect_raw       # Image, 30 Hz

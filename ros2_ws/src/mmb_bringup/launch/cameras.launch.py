@@ -37,6 +37,28 @@ def generate_launch_description():
         ),
     ])
 
+    # OAK-1 (rear, single 4K RGB — no stereo/depth) — depthai-ros driver.
+    # NOTE: topic names (/oak1/rgb/image_raw, /oak1/rgb/camera_info) follow the
+    # same convention as oakd_lite but were NOT yet confirmed against a live
+    # device (none connected at config time). Confirm with `ros2 topic list`.
+    # MULTI-OAK GOTCHA: with oak4d + oakd_lite + oak1 all on one host the driver
+    # may grab the wrong device — set 'i_mx_id' (or 'i_usb_port_id') per node to
+    # pin each to its serial if they race.
+    oak1_group = GroupAction([
+        PushRosNamespace('oak1'),
+        Node(
+            package='depthai_ros_driver',
+            executable='camera_node',
+            name='camera_node',
+            output='screen',
+            parameters=[{
+                'camera_model': 'OAK-1',
+                'i_pipeline_type': 'RGB',
+                'i_nn_type': 'none',
+            }],
+        ),
+    ])
+
     # Intel RealSense — realsense2_camera
     # Adjust serial_no if you have multiple RealSense units
     realsense_group = GroupAction([
@@ -75,6 +97,7 @@ def generate_launch_description():
     return LaunchDescription([
         oak4d_group,
         oakd_lite_group,
+        oak1_group,
         realsense_group,
         insta360_node,
     ])

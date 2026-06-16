@@ -1,6 +1,8 @@
 # Camera <-> LiDAR calibration config.
-# CONFIRM topic names with `ros2 topic list` while the drivers run — the names
-# below follow CONTEXT.md section 7 and are placeholders until verified.
+# Topic names below are synced to the authoritative recorder list,
+# ros2_ws/src/mmb_bringup/config/topics.yaml (the single source of truth).
+# A recorded bag is also self-describing: a wrong topic makes the orchestrator
+# abort with the bag's actual topic list (see io_cam._conns).
 
 ros_distro: humble
 
@@ -64,7 +66,7 @@ pairs:
   oak1:
     camera_frame: camera_oak1
     lidar_frame: lidar_livox_avia
-    image_topic: /oak1/rgb/image_raw
+    image_topic: /oak1/rgb/image_raw        # CONFIRM: not yet in topics.yaml
     camera_info_topic: /oak1/rgb/camera_info
     lidar_topic: /livox/lidar
     camera_model: pinhole
@@ -82,10 +84,16 @@ pairs:
     camera_info_topic: /realsense/color/camera_info
     lidar_topic: /livox/lidar
     camera_model: pinhole
+  # Insta360: the driver publishes /dual_fisheye/image/compressed as H.264
+  # (NOT JPEG/PNG — io_cam.iter_images' cv2.imdecode cannot read it) and there
+  # is NO camera_info topic. This pipeline therefore cannot consume it directly:
+  # decode offline with the driver's decoder/equirectangular nodes first, and
+  # prefer the Koide targetless method for Insta360<->Hesai (see
+  # KOIDE_CROSSCHECK.md). Left here as a documented TODO, not a runnable pair.
   insta360:
     camera_frame: camera_insta360
     lidar_frame: lidar_hesai
-    image_topic: /insta360/image_raw     # CONFIRM: driver topic + image format
-    camera_info_topic: /insta360/camera_info
+    image_topic: /dual_fisheye/image/compressed   # H.264; needs offline decode
+    camera_info_topic: null                        # none published — must supply intrinsics
     lidar_topic: /lidar_points
-    camera_model: fisheye                # dual-fisheye/equirect needs confirming
+    camera_model: fisheye
