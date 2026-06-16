@@ -33,6 +33,15 @@ TOPICS_YAML="$(ros2 pkg prefix mmb_bringup)/share/mmb_bringup/config/topics_${RO
 mapfile -t TOPICS < <(grep -oE '^\s+-\s+(/\S+)' "$TOPICS_YAML" | awk '{print $2}')
 echo "[record_split] ${#TOPICS[@]} topics from $(basename "$TOPICS_YAML")"
 
+# Non-interactive mode (set MMB_YES=1, e.g. when driven over SSH by
+# record_dual.sh): proceed past warnings instead of prompting.
+confirm_or_exit() {   # $1 = prompt text
+    if [ "${MMB_YES:-0}" = 1 ]; then
+        echo "  [MMB_YES] proceeding despite the warning above"; return 0
+    fi
+    read -r -p "$1" yn; [[ "$yn" =~ ^[Yy] ]] || exit 1
+}
+
 echo "[1/3] PTP clock health"
 EXPECT_ROLE=$([ "$ROLE" = lidar ] && echo slave || echo master)
 if systemctl is-active --quiet mmb-ptp4l; then
@@ -45,8 +54,7 @@ else
     echo "  WARNING: mmb-ptp4l not active. Clocks across the two Jetsons may not"
     echo "  agree -> the two bags won't fuse. Set up sync first:"
     echo "    sudo bash bash/setup_time_sync.sh $EXPECT_ROLE <iface> [master_ip]"
-    read -r -p "  Record anyway (un-synced)? [y/N] " yn
-    [[ "$yn" =~ ^[Yy] ]] || exit 1
+    confirm_or_exit "  Record anyway (un-synced)? [y/N] "
 fi
 
 echo "[2/3] topic liveness (10 s discovery window)"
@@ -61,8 +69,7 @@ for t in "${TOPICS[@]}"; do
 done
 if [ "$MISSING" -gt 0 ]; then
     echo "  $MISSING topic(s) absent — start this Jetson's drivers first."
-    read -r -p "  Record anyway? [y/N] " yn
-    [[ "$yn" =~ ^[Yy] ]] || exit 1
+    confirm_or_exit "  Record anyway? [y/N] "
 else
     echo "  all topics present"
 fi
@@ -72,8 +79,7 @@ mkdir -p "$OUT_DIR"
 FREE_GB=$(df -BG --output=avail "$OUT_DIR" | tail -1 | tr -dc '0-9')
 echo "  ${FREE_GB} GB free in $OUT_DIR"
 if [ "$FREE_GB" -lt "$MIN_FREE_GB" ]; then
-    read -r -p "  Less than ${MIN_FREE_GB} GB free. Continue? [y/N] " yn
-    [[ "$yn" =~ ^[Yy] ]] || exit 1
+    confirm_or_exit "  Less than ${MIN_FREE_GB} GB free. Continue? [y/N] "
 fi
 
 BAG="$OUT_DIR/mmb_${ROLE}_$(date +%Y%m%d_%H%M)_${RUN_NAME}"
