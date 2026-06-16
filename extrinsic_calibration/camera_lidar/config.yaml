@@ -9,11 +9,11 @@ ros_distro: humble
 board:
   # Measure the PRINTED board, not the design file: long side of one square in
   # meters. Record dictionary + sizes on the physical board itself.
-  squares_x: 7
-  squares_y: 5
-  square_len_m: 0.10
-  marker_len_m: 0.075
-  dictionary: DICT_5X5_100
+  squares_x: 11
+  squares_y: 8
+  square_len_m: 0.034
+  marker_len_m: 0.025
+  dictionary: DICT_5X5_250  # confirmed: physical board uses 5x5_250, printed A3
   min_corners: 8           # discard detections with fewer ChArUco corners
   max_reproj_err_px: 1.5   # discard detections that reproject worse than this
 
