@@ -240,7 +240,6 @@ remove_paths "home workspaces and SDK directories" \
     "$HOME/ros_ws" \
     "$HOME/depthai_v2_ws" \
     "$HOME/hesai_sdk" \
-    "$HOME/insta360_sdk" \
     "$HOME/.ros"
 
 remove_sudo_paths "udev rules installed by setup/config scripts" \
