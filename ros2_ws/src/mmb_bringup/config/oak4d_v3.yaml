@@ -16,7 +16,15 @@
     pipeline_gen:
       i_nn_type: none
       i_pipeline_type: RGB
+      i_enable_imu: true   # publish /oak4d/imu/data (was off -> 0 msgs in the
+                           # all-sensors bag). Requires this OAK-4D unit to have
+                           # an onboard IMU; if it doesn't, the driver simply
+                           # won't publish (verify with `ros2 topic hz`).
     rgb:
       i_fps: 10.0       # match the Hesai (~10 Hz); avoids wasted frames
       i_width: 1920     # default was 640x400 (too low for ChArUco); 1080p over
       i_height: 1080    # PoE at 10 fps ~60 MB/s, well within 1GbE
+    imu:
+      i_batch_report_threshold: 1   # low-latency: emit each batch promptly
+      i_max_batch_reports: 10
+      i_enable_rotation: false      # raw accel + gyro only (no onboard fusion)

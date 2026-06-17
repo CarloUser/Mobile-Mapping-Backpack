@@ -20,7 +20,8 @@
 
 set -uo pipefail
 MIN_FREE_GB=20
-WARMUP_S=12
+WARMUP_S=60   # USB2 RealSense + the OAKs need ~15-20s each to come up; give the
+              # whole stack a full minute before the recorder subscribes.
 STATE_DIR="$HOME/recordings/mapping/.record_all_state"
 STATE="$STATE_DIR/run.env"
 
@@ -46,6 +47,54 @@ load_topics() {
 # emit a second line. Capture once and default if the file is missing entirely.
 nsub() { local n; n=$(grep -c 'Subscribed to topic' "$1" 2>/dev/null); echo "${n:-0}"; }
 
+# Pre-flight: list which expected sensors are actually present BEFORE the 60s
+# warm-up, so a dead Insta360 / unplugged GNSS / unreachable PoE camera is caught
+# in seconds instead of after recording tens of GB. Non-fatal by default (the
+# rig philosophy is "record whatever comes up"); set STRICT_PREFLIGHT=1 to abort
+# on any missing device, or SKIP_PREFLIGHT=1 to skip the check entirely.
+# Override the network targets with PREFLIGHT_PING_IPS="ip1 ip2 ...".
+HESAI_IP="${HESAI_IP:-192.168.1.201}"     # hesai_jt128.yaml device_ip_address
+OAK4D_IP="${OAK4D_IP:-192.168.1.97}"      # oak4d_v3.yaml pinned unit (PoE)
+preflight_devices() {
+    [ "${SKIP_PREFLIGHT:-0}" = "1" ] && return 0
+    local miss=0
+    echo "[preflight] checking expected devices..."
+
+    # _chk <label> <test-command...> ; prints OK / MISSING, counts misses
+    _chk() {
+        local label="$1"; shift
+        if "$@" >/dev/null 2>&1; then
+            printf '   [ OK      ] %s\n' "$label"
+        else
+            printf '   [ MISSING ] %s\n' "$label"; miss=$((miss+1))
+        fi
+    }
+    _has_glob() { compgen -G "$1" >/dev/null; }                 # any /dev/ttyUSB* etc.
+    _has_oak_usb() { lsusb 2>/dev/null | grep -qiE '03e7:|Luxonis|Movidius'; }
+    _ping() { ping -c1 -W1 "$1"; }
+
+    _chk "Xsens IMU      (serial /dev/ttyUSB*)"      _has_glob '/dev/ttyUSB*'
+    _chk "u-blox GNSS    (serial /dev/ttyACM*)"      _has_glob '/dev/ttyACM*'
+    _chk "Insta360/UVC   (video /dev/video*)"        _has_glob '/dev/video*'
+    _chk "USB OAK cams   (OAK-1 / OAK-D Lite)"       _has_oak_usb
+    _chk "Hesai JT128    (ping $HESAI_IP)"           _ping "$HESAI_IP"
+    _chk "OAK-4D PoE     (ping $OAK4D_IP)"           _ping "$OAK4D_IP"
+    for ip in ${PREFLIGHT_PING_IPS:-}; do
+        _chk "extra host     (ping $ip)"             _ping "$ip"
+    done
+
+    if [ "$miss" -gt 0 ]; then
+        echo "[preflight] $miss expected device(s) MISSING — those topics will be empty."
+        if [ "${STRICT_PREFLIGHT:-0}" = "1" ]; then
+            echo "[preflight] STRICT_PREFLIGHT=1 set — aborting before warm-up." >&2
+            exit 1
+        fi
+        echo "[preflight] continuing anyway (STRICT_PREFLIGHT=1 to abort, SKIP_PREFLIGHT=1 to silence)."
+    else
+        echo "[preflight] all expected devices present."
+    fi
+}
+
 # Bring up drivers (own session) then, after warm-up, the recorder (own
 # session). setsid detaches both into their own sessions so they survive this
 # script exiting — that is what makes the detached start/stop model work.
@@ -70,6 +119,8 @@ launch_stack() {
         echo "  Less than ${MIN_FREE_GB} GB free — refusing. Free space or re-run with FORCE=1." >&2
         exit 1
     fi
+
+    preflight_devices
 
     echo "[1/2] launching all sensor drivers (all_sensors.launch.py)..."
     setsid ros2 launch mmb_bringup all_sensors.launch.py </dev/null >"$DLOG" 2>&1 &

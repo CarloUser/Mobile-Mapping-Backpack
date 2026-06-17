@@ -14,7 +14,21 @@ def generate_launch_description():
             'port': '/dev/ttyUSB0',
             'baud_rate': 0,           # 0 = auto-detect
             'frame_id': 'imu_xsens',
+            # The all-sensors bag got /imu/mag but NO /imu/data: with
+            # enable_deviceConfig=false the driver used the MTi's stored output
+            # config, which streamed MagneticField but not accel/gyro, so the
+            # node had nothing to publish on /imu/data. Set enable_deviceConfig
+            # true so the driver programs the device output (accel + gyro +
+            # quaternion at output_data_rate) on startup. It writes the config to
+            # the device, so you may flip this back to False once a recording
+            # confirms /imu/data streams (leaving it True just reconfigures each
+            # launch — idempotent, a few seconds slower).
+            'enable_deviceConfig': True,
+            'output_data_rate': 400,  # MTi-610R supports up to 400 Hz
             'pub_imu': True,
+            'pub_acceleration': True,
+            'pub_angular_velocity': True,
+            'pub_quaternion': True,
             'pub_mag': True,
             'pub_gps': False,
             'pub_gnss': False,

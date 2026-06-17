@@ -1,8 +1,7 @@
 import os
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
-from launch_ros.actions import Node, PushRosNamespace, ComposableNodeContainer
-from launch.actions import GroupAction
+from launch_ros.actions import Node
 
 
 def generate_launch_description():
@@ -73,26 +72,26 @@ def generate_launch_description():
         }],
     )
 
-    # Intel RealSense — realsense2_camera
-    # Adjust serial_no if you have multiple RealSense units
-    realsense_group = GroupAction([
-        PushRosNamespace('realsense'),
-        Node(
-            package='realsense2_camera',
-            executable='realsense2_camera_node',
-            name='realsense2_camera_node',
-            output='screen',
-            parameters=[{
-                'enable_color': True,
-                'enable_depth': False,    # RGB (color) only — depth not recorded
-                'enable_infra1': False,
-                'enable_infra2': False,
-                'color_fps': 30,
-                'align_depth.enable': False,
-                'serial_no': '',   # leave empty to use first detected unit
-            }],
-        ),
-    ])
+    # Intel RealSense — realsense2_camera. The driver publishes under its full
+    # node name, so name='realsense' (no PushRosNamespace) gives
+    # /realsense/color/image_raw — matching topics.yaml. (Namespace + a separate
+    # node name would nest as /realsense/<node>/color/..., which the recorder
+    # wouldn't match.) Adjust serial_no if you have multiple RealSense units.
+    realsense_node = Node(
+        package='realsense2_camera',
+        executable='realsense2_camera_node',
+        name='realsense',
+        output='screen',
+        parameters=[{
+            'enable_color': True,
+            'enable_depth': False,    # RGB (color) only — depth not recorded
+            'enable_infra1': False,
+            'enable_infra2': False,
+            'color_fps': 30,
+            'align_depth.enable': False,
+            'serial_no': '',   # leave empty to use first detected unit
+        }],
+    )
 
     # Insta360 (omni hub camera) — driver node only: it publishes the
     # H.264-compressed dual-fisheye stream (/dual_fisheye/image/compressed)
@@ -111,6 +110,6 @@ def generate_launch_description():
         oak4d_group,
         oakd_lite_node,
         oak1_node,
-        realsense_group,
+        realsense_node,
         insta360_node,
     ])
