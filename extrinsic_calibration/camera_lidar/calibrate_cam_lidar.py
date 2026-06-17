@@ -30,16 +30,14 @@ import io_cam
 import plane_solve as ps
 from board import BoardDetector
 
-# cv2 solvePnP/ChArUco returns the board pose in the OPTICAL frame
-# (X-right, Y-down, Z-forward). This rig's extrinsics use base-aligned CAD/body
-# frames (REP-103: X-forward, Y-left, Z-up). Convert the camera-frame board
-# quantities optical->body so they chain correctly through the CAD extrinsics
-# (identity seed then crops correctly) and the solved T_base_cam comes out in
-# the body convention, matching extrinsics_initial.yaml. Plane offset d is
-# rotation-invariant (frames share an origin), so it is left unchanged.
-R_OPT2BODY = np.array([[0.0, 0.0, 1.0],
-                       [-1.0, 0.0, 0.0],
-                       [0.0, -1.0, 0.0]])
+# Frames are now ROS REP-103 throughout, and every camera_* frame in
+# extrinsics_initial.yaml is its ROS OPTICAL frame (X-right, Y-down, Z-forward) —
+# the exact convention cv2 solvePnP/ChArUco returns. So the camera-frame board
+# quantities need NO conversion: we solve T_cam_lidar with the camera = its
+# optical frame and chain straight through the extrinsics. (An earlier version
+# rotated optical->CAD part frame via R_OPT2CAD/R_OPT2BODY; obsolete now that the
+# repo was converted to REP-103 with optical camera frames — see
+# extrinsic_calibration/scripts/convert_cad_to_ros_frame.py.)
 
 
 def resolve(config_path, value):
@@ -92,12 +90,12 @@ def hold_representative(hold):
     boards = np.array(
         [(d_["T_cam_board"][:3, :3] @ d_["corners_obj"].mean(axis=0))
          + d_["T_cam_board"][:3, 3] for _, d_ in hold])
-    # optical -> base-aligned body frame (see R_OPT2BODY note); d is invariant.
+    # camera frame == its ROS optical frame, so no conversion (see note above).
     return {
         "t_center": float(ts[len(ts) // 2]),
-        "n": R_OPT2BODY @ n, "d": d,
-        "board_center_cam": R_OPT2BODY @ np.median(boards, axis=0),
-        "board_origin_cam": R_OPT2BODY @ np.median(centers, axis=0),
+        "n": n, "d": d,
+        "board_center_cam": np.median(boards, axis=0),
+        "board_origin_cam": np.median(centers, axis=0),
         "n_frames": len(hold),
     }
 

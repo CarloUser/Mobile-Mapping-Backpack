@@ -57,13 +57,14 @@ Read `CONTEXT.md` for the full method and geometry; this README is operational.
 
 ## Caveats / open items
 
-- CAD frames in `coordinate_systems.yaml` are SolidWorks part frames; the
-  lidar_lidar stage showed they can disagree with sensor data frames by axis
-  permutations. The CAD seed here is used only to *find* the board in the
-  cloud (crop + normal gate). If a pair skips most holds with "normal X deg
-  off CAD prediction", the camera's CAD orientation is probably convention-
-  mismatched too — raise `lidar.max_normal_vs_cad_deg` (e.g. to 90) and rely
-  on the extent check, then inspect the result with `--save-debug`.
+- The extrinsics seed is now ROS REP-103 (`extrinsics_initial.yaml`, converted
+  from the SolidWorks CAD source `coordinate_systems.yaml` via
+  `../scripts/convert_cad_to_ros_frame.py`); camera frames are optical, matching
+  cv2, so there is no fudge matrix. The seed is used only to *find* the board in
+  the cloud (crop + normal gate). If a pair skips most holds with "normal X deg
+  off prediction", check that camera's seed orientation/mounting, raise
+  `lidar.max_normal_vs_cad_deg` and rely on the extent check, then inspect with
+  `--save-debug`.
 - Insta360: confirm driver topic + image format (dual-fisheye vs
   equirectangular). `camera_model: fisheye` handles a single fisheye image
   with k1..k4; equirectangular would need a different projection (not built).

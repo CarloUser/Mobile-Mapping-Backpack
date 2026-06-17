@@ -20,10 +20,15 @@ TL;DR recommendations, in priority order:
    Kalibr is the gold standard but is ROS1-centric and solves a harder problem
    (joint intrinsics+extrinsics from synchronized video) than we need given the
    LiDAR-anchored backbone.
-4. The CAD seeds in `coordinate_systems.yaml` are SolidWorks **part frames**;
-   the lidar_lidar stage proved they can differ from sensor data frames by
-   axis permutations (120° apparent "error"). Treat CAD as a search seed, never
-   as a validation reference, until each frame's convention is reconciled.
+4. The CAD seeds in `coordinate_systems.yaml` are SolidWorks **part frames**
+   (X-fwd/Y-up/Z-right); the lidar_lidar stage proved they can differ from sensor
+   data frames by axis permutations (120° apparent "error"). Treat CAD as a search
+   seed, never as a validation reference.
+   - UPDATE (2026-06-17): `extrinsics_initial.yaml` is now re-expressed in ROS
+     REP-103 (X-fwd/Y-left/Z-up; cameras optical) via
+     `scripts/convert_cad_to_ros_frame.py`. `coordinate_systems.yaml` stays the
+     untouched CAD source of truth. Base convention is reconciled; remaining
+     per-frame differences vs sensor data are genuine calibration corrections.
 
 ---
 

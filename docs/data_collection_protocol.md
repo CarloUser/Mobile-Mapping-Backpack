@@ -13,7 +13,16 @@ follow to ensure rosbags are interoperable across calibration workflows.
 ## 1. Coordinate Frames and TF Tree
 
 All frames follow the ROS [REP-103](https://www.ros.org/reps/rep-0103.html)
-convention: x-forward, y-left, z-up for body frames; ENU for world frames.
+convention: **x-forward, y-left, z-up** for body frames (`base_link`, LiDARs,
+IMU, GNSS); **camera frames are optical** (x-right, y-down, z-forward, matching
+`camera_info`/cv2); ENU for world frames.
+
+> Note (2026-06-17): the SolidWorks export is in the CAD convention
+> (x-forward, y-up, z-right) and is preserved as the source of truth in
+> `Coordinate_systems/coordinate_systems.yaml`. `extrinsics_initial.yaml` was
+> re-expressed into REP-103 via `Rx(+90°)` (see
+> `extrinsic_calibration/scripts/convert_cad_to_ros_frame.py`), so the published
+> TF tree is now standard ROS REP-103.
 
 ```
 base_link                    ← physical center of the backpack frame

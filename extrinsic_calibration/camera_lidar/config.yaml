@@ -32,21 +32,22 @@ lidar:
   # non-repetitive pattern needs ~1 s to densify, the Hesai needs one scan.
   half_window_s: 0.5
   crop_margin_m: 0.35      # crop radius = board half-diagonal + this margin.
-                           # NOTE: auto-crop needs a decent camera->base seed;
-                           # OAK-4D seed is ~50 deg rough so the crop mis-centers
-                           # (grabs walls / nothing). Fix the seed or use Koide
-                           # (KOIDE_CROSSCHECK.md) before relying on this.
+                           # Auto-crop uses the camera->base seed from
+                           # extrinsics_initial.yaml (now ROS REP-103, camera
+                           # frames = optical), so the OAK-4D seed is accurate.
+                           # The crop still assumes the board is ISOLATED: keep
+                           # nothing else flat within this radius (the 2026-06-16
+                           # bag failed because the board was held against the
+                           # operator's body — see CALIBRATION_CONTEXT.md).
   ransac_dist_m: 0.02
   ransac_iters: 500
   min_inliers: 60
   max_extent_margin_m: 0.30  # reject patches larger than board size + this (walls)
   max_normal_vs_cad_deg: 30  # reject patches whose normal disagrees with the
-                             # CAD-predicted board normal by more than this.
-                             # NOTE: rig uses CAD/base-aligned part frames, NOT
-                             # ROS optical frames. calibrate_cam_lidar.py treats
-                             # the camera pose as optical (cv2 convention) — that
-                             # mismatch (not the seed) is the real thing to
-                             # reconcile when resuming this calibration.
+                             # seed-predicted board normal by more than this.
+                             # (Frame convention is now consistent end-to-end:
+                             # extrinsics are ROS REP-103 and camera frames are
+                             # optical, matching cv2 — no fudge rotation needed.)
 
 solve:
   min_poses: 6

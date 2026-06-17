@@ -1,51 +1,53 @@
+# Re-expressed from the SolidWorks CAD convention (X-fwd,Y-up,Z-right) into ROS REP-103 (X-fwd,Y-left,Z-up) by Rx(+90deg); camera_* frames are ROS OPTICAL frames. Source of truth: Coordinate_systems/coordinate_systems.yaml.
+
 reference_frame: base_link
 units: {translation: meters, rotation: quaternion_xyzw}
 transforms:
 - source_frame: Oak_4
   parent: base_link
   child: camera_oak4d
-  xyz: [0.00926604120012522, 0.04022890058414, -0.0487610765723726]
-  q_xyzw: [0.0, 0.0, 0.0, 1.0]
+  xyz: [0.0092660412, 0.048761076572, 0.040228900584]
+  q_xyzw: [0.5, -0.5, 0.5, -0.5]
 - source_frame: GNSS_Antenna
   parent: base_link
   child: gnss_antenna
-  xyz: [0.00740394746195187, 0.121672119427252, 0.0952111214036253]
-  q_xyzw: [0.0, 0.0, 0.0, 1.0]
+  xyz: [0.007403947462, -0.095211121404, 0.121672119427]
+  q_xyzw: [0.707106781187, 0.0, 0.0, 0.707106781187]
   note: GNSS rotation is not physically meaningful for a single antenna; translation
     is the lever arm.
 - source_frame: Livox_Avia
   parent: base_link
   child: lidar_livox_avia
-  xyz: [0.00615953452791859, -0.0261595830828822, -0.0639745409273749]
-  q_xyzw: [-3.49148133884313e-15, -3.49148133884313e-15, 1.0, -1.21904419394898e-29]
+  xyz: [0.006159534528, 0.063974540927, -0.026159583083]
+  q_xyzw: [0.0, 0.707106781187, -0.707106781187, -0.0]
 - source_frame: Hesai
   parent: base_link
   child: lidar_hesai
-  xyz: [0.00825335383692801, 0.0507170454616155, 0.0965158453101299]
-  q_xyzw: [-0.707106781186549, 0.0, 0.0, 0.707106781186546]
+  xyz: [0.008253353837, -0.09651584531, 0.050717045462]
+  q_xyzw: [-0.0, 0.0, 0.0, 1.0]
 - source_frame: Intel_Realsense
   parent: base_link
   child: camera_realsense
-  xyz: [-0.0500226269231557, 0.106536011222252, 0.0951690299822231]
-  q_xyzw: [-3.49148133884313e-15, -3.49148133884313e-15, 1.0, -1.21904419394898e-29]
+  xyz: [-0.050022626923, -0.095169029982, 0.106536011222]
+  q_xyzw: [-0.5, 0.5, 0.5, -0.5]
 - source_frame: Oak_4_light
   parent: base_link
   child: camera_oakd_lite
-  xyz: [-0.0476411677891182, 0.113285974499897, -0.07604038256127]
-  q_xyzw: [0.0, 1.0, 0.0, 3.49148133884313e-15]
+  xyz: [-0.047641167789, 0.076040382561, 0.1132859745]
+  q_xyzw: [0.5, 0.5, -0.5, -0.5]
   note: Confirm that SolidWorks frame Oak_4_light is the OAK-D Lite before calibration.
 - source_frame: Oak_1
   parent: base_link
   child: camera_oak1
-  xyz: [-0.052987960674065, 0.117585651088969, 0.00942191946353569]
-  q_xyzw: [0.0, 1.0, 0.0, 3.49148133884313e-15]
+  xyz: [-0.052987960674, -0.009421919464, 0.117585651089]
+  q_xyzw: [0.5, 0.5, -0.5, -0.5]
 - source_frame: Xsens_IMU
   parent: base_link
   child: imu_xsens
-  xyz: [0.00293007514840342, 0.0981721194272516, -0.0992596717526523]
-  q_xyzw: [0.0, 0.0, 0.0, 1.0]
+  xyz: [0.002930075148, 0.099259671753, 0.098172119427]
+  q_xyzw: [0.707106781187, 0.0, 0.0, 0.707106781187]
 - source_frame: Insta_360
   parent: base_link
   child: camera_insta360
-  xyz: [0.001393353836928, 0.273672119427252, -0.00852001287943149]
-  q_xyzw: [0.0, 0.0, 0.0, 1.0]
+  xyz: [0.001393353837, 0.008520012879, 0.273672119427]
+  q_xyzw: [0.5, -0.5, 0.5, -0.5]
