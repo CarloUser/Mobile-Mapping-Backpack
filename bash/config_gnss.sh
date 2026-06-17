@@ -67,12 +67,20 @@ sudo udevadm trigger
 
 echo "✔ udev rule created → /dev/tty_Ardusimple"
 
+# -----------------------------
 # STEP 5: Rebuild
 # -----------------------------
 echo "[4/5] Rebuilding..."
 
 cd $WS
-colcon build --symlink-install --parallel-workers 2
+colcon build \
+  --symlink-install \
+  --parallel-workers 2 \
+  --packages-select \
+    ublox_serialization \
+    ublox_msgs \
+    ublox_gps \
+    ublox
 
 # -----------------------------
 # DONE
