@@ -1,0 +1,51 @@
+# FACTORY (on-device) camera intrinsics, extracted from recorded bags'
+# camera_info topics — NOT from our hand-made ChArUco runs. Preferred over
+# all_calibration_results.yaml for the OAKs because those hand-made fits are at
+# the wrong resolution and several are physically implausible (oaklite fx!=fy by
+# ~2x, intel null reproj). fx≈fy here and OAK-1/OAK-D-Lite carry full distortion.
+#
+# Source bags:
+#   oak4d  : recordings/camlidar/oak4d_20260616_180549  (and the all-sensors bag)
+#   oak1   : recordings/mapping/mmb_all_20260616_193419_campus_all_01
+#   oakd_lite : same all-sensors bag
+#
+# IMPORTANT: K is resolution-specific. These are valid ONLY at the listed
+# resolution; scale fx,fy,cx,cy if you record at a different size.
+# TODO when the rig is reconnected: pull live camera_info for ALL cameras
+#   (incl. RealSense, which never recorded, and the OAKs at record resolution)
+#   and resolve the OAK-4D empty-distortion question.
+
+cameras:
+  oak4d:
+    width: 1920
+    height: 1080
+    distortion_model: rational_polynomial
+    camera_matrix: [1441.6, 0.0, 988.4,
+                    0.0, 1441.0, 569.5,
+                    0.0, 0.0, 1.0]
+    dist_coeffs: []          # WARNING: driver published empty distortion. Verify
+                             # live whether it's omitted or the stream is already
+                             # rectified before trusting undistorted projection.
+  oak1:
+    width: 1280
+    height: 720
+    distortion_model: rational_polynomial
+    camera_matrix: [669.4, 0.0, 637.6,
+                    0.0, 669.2, 334.6,
+                    0.0, 0.0, 1.0]
+    dist_coeffs: [-1.0823, 1.063, 0.0002, 0.0001, -0.024, -1.0629, 0.9642, 0.0799]
+  oakd_lite:
+    width: 1280
+    height: 720
+    distortion_model: rational_polynomial
+    camera_matrix: [993.9, 0.0, 650.9,
+                    0.0, 993.9, 360.0,
+                    0.0, 0.0, 1.0]
+    dist_coeffs: [10.7039, -5.7185, -0.0002, 0.001, 122.6699, 10.6641, -7.0729, 124.4883]
+
+# NOT available without hardware:
+#   realsense : never recorded a camera_info topic (was unplugged). Plug in -> echo
+#               /realsense/color/camera_info, or read via pyrealsense2.
+#   insta360  : driver publishes NO camera_info. Use our fisheye calibration
+#               (insta360_front / insta360_back in all_calibration_results.yaml).
+</content>
