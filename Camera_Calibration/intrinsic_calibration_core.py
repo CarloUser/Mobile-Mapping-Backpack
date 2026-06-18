@@ -324,6 +324,8 @@ def make_board(args):
         args.square_size * args.marker_ratio,
         dictionary,
     )
+    if hasattr(board, "setLegacyPattern"):
+        board.setLegacyPattern(True)
     params = cv2.aruco.DetectorParameters()
     if hasattr(cv2.aruco, "ArucoDetector"):
         detector = cv2.aruco.ArucoDetector(dictionary, params)
@@ -345,11 +347,27 @@ def detect_board(frame, board, detect):
 
 
 def draw_status(
-    frame, corners, ids, marker_count, ch_count, name, saved, target, min_features, max_width
+    frame,
+    corners,
+    ids,
+    ch_corners,
+    ch_ids,
+    marker_count,
+    ch_count,
+    name,
+    saved,
+    target,
+    min_features,
+    max_width,
 ):
     display = frame.copy()
     if ids is not None:
         cv2.aruco.drawDetectedMarkers(display, corners, ids)
+    # Draw actual ChArUco chessboard corners too. Marker boxes alone can look
+    # like the board is "detected", but calibration only saves if ChArUco
+    # chessboard corners are interpolated successfully.
+    if ch_corners is not None and ch_ids is not None:
+        cv2.aruco.drawDetectedCornersCharuco(display, ch_corners, ch_ids, (255, 0, 255))
     ok = ch_count >= min_features
     color = (0, 255, 0) if ok else (0, 0, 255)
     cv2.putText(
@@ -387,18 +405,28 @@ def prepare_capture_dir(state):
         )
 
 
-def save_sample(state, frame, board, ch_corners, ch_ids):
+def save_sample(state, frame, board, ch_corners, ch_ids, is_valid):
+    """Save every timed frame, but only keep valid ChArUco detections for calibration."""
     state.image_dir.mkdir(parents=True, exist_ok=True)
-    cv2.imwrite(os.fspath(state.image_dir / f"frame_{state.file_index:04d}.png"), frame)
+    output_path = state.image_dir / f"frame_{state.file_index:04d}.png"
+    ok = cv2.imwrite(os.fspath(output_path), frame)
+    if not ok:
+        raise RuntimeError(f"{state.name}: cv2.imwrite failed for {output_path}")
+
     state.file_index += 1
-    state.saved += 1
+    state.saved += 1  # total timed pictures saved, valid or invalid
     state.image_size = frame.shape[1], frame.shape[0]
-    state.valid_corners.append(ch_corners.astype(np.float32))
-    state.valid_ids.append(ch_ids)
-    if state.fisheye:
-        obj = board.getChessboardCorners()[ch_ids.flatten()]
-        state.fisheye_obj_pts.append(obj.reshape(-1, 1, 3).astype(np.float32))
-        state.fisheye_img_pts.append(ch_corners.astype(np.float32))
+
+    if is_valid:
+        state.valid_corners.append(ch_corners.astype(np.float32))
+        state.valid_ids.append(ch_ids)
+        if state.fisheye:
+            obj = board.getChessboardCorners()[ch_ids.flatten()]
+            state.fisheye_obj_pts.append(obj.reshape(-1, 1, 3).astype(np.float32))
+            state.fisheye_img_pts.append(ch_corners.astype(np.float32))
+
+    return output_path
+
 
 
 def calibrate_camera(state, board, min_valid):
@@ -680,7 +708,9 @@ def run_stage(stage_name, cameras, board, detect, args):
     print(f"\n=== {stage_name.upper()} STAGE ===")
     print(
         f"Move the board in front of: {', '.join(c.name for c in cameras)}. "
-        f"Saving every {args.capture_interval}s only when >= {args.min_features} ChArUco corners are visible."
+        f"Waiting {args.initial_delay}s, then checking 1 image every {args.capture_interval}s. "
+        f"Only frames with >= {args.min_features} ChArUco corners are saved. "
+        f"Calibration starts after {args.target_valid} valid frames are collected."
     )
     print("Press Q to finish this stage early.")
 
@@ -711,51 +741,70 @@ def run_stage(stage_name, cameras, board, detect, args):
     cv2.waitKey(1)
 
     start = time.monotonic()
-    last_capture = 0.0
+
+    # Simple timed capture logic:
+    # 1. Wait args.initial_delay seconds so you can position the board.
+    # 2. Every args.capture_interval seconds, check the current frame.
+    # 3. Save only frames with enough ChArUco corners for calibration.
+    next_capture = {state.name: start + args.initial_delay for state in cameras}
+
     last_frame_report = start
-    last_reject_report = {state.name: start for state in cameras}
+    last_status_report = {state.name: start for state in cameras}
     frame_counts = {state.name: 0 for state in cameras}
     stop_reason = "user stopped"
+
     while True:
         now = time.monotonic()
-        if all(c.saved >= args.target_valid for c in cameras):
-            stop_reason = "target reached"
+        if all(len(c.valid_corners) >= args.target_valid for c in cameras):
+            stop_reason = "target valid calibration frames reached"
+            break
+        if all(c.saved >= args.max_saved for c in cameras):
+            stop_reason = "maximum saved picture count reached"
             break
         if now - start >= args.stage_timeout:
             stop_reason = "stage timeout"
             break
 
         previews = []
-        should_capture = now - last_capture >= args.capture_interval
-        captured = False
 
         for state in cameras:
             frame = state.reader.read()
             if frame is None:
                 continue
+
             frame_counts[state.name] += 1
             preview_frame = (
                 state.reader.preview_frame(frame)
                 if hasattr(state.reader, "preview_frame")
                 else frame
             )
+
             corners, ids, ch_corners, ch_ids, marker_count, ch_count = detect_board(
                 frame, board, detect
             )
             state.last_marker_count = marker_count
             state.last_ch_count = ch_count
-            preview_corners, preview_ids, _, _, preview_marker_count, preview_ch_count = (
-                detect_board(preview_frame, board, detect)
-            )
+
+            (
+                preview_corners,
+                preview_ids,
+                preview_ch_corners,
+                preview_ch_ids,
+                preview_marker_count,
+                preview_ch_count,
+            ) = detect_board(preview_frame, board, detect)
+
             previews.append(
                 draw_status(
                     preview_frame,
                     preview_corners,
                     preview_ids,
-                    marker_count,
-                    ch_count,
+                    preview_ch_corners,
+                    preview_ch_ids,
+                    preview_marker_count,
+                    preview_ch_count,
                     state.name,
-                    state.saved,
+                    len(state.valid_corners),
                     args.target_valid,
                     args.min_features,
                     args.preview_width,
@@ -763,29 +812,51 @@ def run_stage(stage_name, cameras, board, detect, args):
             )
 
             if (
-                should_capture
-                and state.saved < args.target_valid
-                and ch_count >= args.min_features
-                and ch_corners is not None
-                and ch_ids is not None
+                len(state.valid_corners) < args.target_valid
+                and state.saved < args.max_saved
+                and now >= next_capture[state.name]
             ):
-                save_sample(state, frame, board, ch_corners, ch_ids)
-                captured = True
-                print(f"{state.name}: captured {state.saved}/{args.target_valid}")
-            elif (
-                should_capture
-                and state.saved < args.target_valid
-                and now - last_reject_report[state.name] >= 3.0
-            ):
+                is_valid = (
+                    ch_count >= args.min_features
+                    and ch_corners is not None
+                    and ch_ids is not None
+                )
+
+                if is_valid:
+                    output_path = save_sample(
+                        state,
+                        frame,
+                        board,
+                        ch_corners,
+                        ch_ids,
+                        is_valid,
+                    )
+                    valid_count = len(state.valid_corners)
+                    print(
+                        f"{state.name}: picture {state.saved}/{args.target_valid} saved -> {output_path} | "
+                        f"VALID for calibration | charuco {ch_count}/{args.min_features}, markers {marker_count}",
+                        flush=True,
+                    )
+                else:
+                    valid_count = len(state.valid_corners)
+                    print(
+                        f"{state.name}: not saved | charuco {ch_count}/{args.min_features}, markers {marker_count} | "
+                        f"valid calibration frames {valid_count}/{args.target_valid}",
+                        flush=True,
+                    )
+
+                # Schedule the next picture from now. This avoids burst-saving
+                # several frames if one loop iteration was delayed.
+                next_capture[state.name] = now + args.capture_interval
+
+            elif now < next_capture[state.name] and now - last_status_report[state.name] >= 1.0:
+                wait_left = next_capture[state.name] - now
                 print(
-                    f"{state.name}: not saved - charuco {ch_count}/{args.min_features}, "
-                    f"markers {marker_count}; show more of the board to this camera",
+                    f"{state.name}: next timed picture in {wait_left:.1f}s | "
+                    f"currently charuco {ch_count}/{args.min_features}, markers {marker_count}",
                     flush=True,
                 )
-                last_reject_report[state.name] = now
-
-        if captured:
-            last_capture = now
+                last_status_report[state.name] = now
 
         if previews:
             max_h = max(p.shape[0] for p in previews)
@@ -816,7 +887,8 @@ def run_stage(stage_name, cameras, board, detect, args):
     print(f"{stage_name}: stopped because {stop_reason}", flush=True)
     for state in cameras:
         print(
-            f"{state.name}: accepted {state.saved}/{args.target_valid}; "
+            f"{state.name}: saved pictures {state.saved}/{args.max_saved}; "
+            f"valid calibration frames {len(state.valid_corners)}; "
             f"last seen charuco {state.last_ch_count}/{args.min_features}, markers {state.last_marker_count}",
             flush=True,
         )
@@ -838,9 +910,11 @@ def parse_args():
     )
     parser.add_argument("--target-valid", type=int, default=30)
     parser.add_argument("--min-valid", type=int, default=20)
-    parser.add_argument("--min-features", type=int, default=8)
-    parser.add_argument("--capture-interval", type=float, default=0.25)
-    parser.add_argument("--stage-timeout", type=float, default=600.0)
+    parser.add_argument("--max-saved", type=int, default=40)
+    parser.add_argument("--min-features", type=int, default=15)
+    parser.add_argument("--capture-interval", type=float, default=1.5)
+    parser.add_argument("--initial-delay", type=float, default=5.0)
+    parser.add_argument("--stage-timeout", type=float, default=1200.0)
     parser.add_argument("--preview-width", type=int, default=1280)
     parser.add_argument("--width", type=int, default=1920)
     parser.add_argument("--height", type=int, default=1080)
@@ -848,17 +922,17 @@ def parse_args():
     parser.add_argument("--realsense-width", type=int, default=1920)
     parser.add_argument("--realsense-height", type=int, default=1080)
     parser.add_argument("--realsense-fps", type=float, default=8.0)
-    parser.add_argument("--oak-width", type=int, default=3840)
-    parser.add_argument("--oak-height", type=int, default=2160)
-    parser.add_argument("--oak-fps", type=float, default=5.0)
+    parser.add_argument("--oak-width", type=int, default=1920)
+    parser.add_argument("--oak-height", type=int, default=1080)
+    parser.add_argument("--oak-fps", type=float, default=15.0)
     parser.add_argument("--oak4d-width", type=int, default=3840)
     parser.add_argument("--oak4d-height", type=int, default=2160)
     parser.add_argument("--oak4d-fps", type=float, default=5.0)
     parser.add_argument("--dictionary", default="DICT_5X5_250")
     parser.add_argument("--board-cols", type=int, default=11)
     parser.add_argument("--board-rows", type=int, default=8)
-    parser.add_argument("--square-size", type=float, default=0.030)
-    parser.add_argument("--marker-ratio", type=float, default=0.75)
+    parser.add_argument("--square-size", type=float, default=0.034)
+    parser.add_argument("--marker-ratio", type=float, default=25.0 / 34.0)
     parser.add_argument("--oak-socket", default="CAM_A")
     parser.add_argument("--oak1-mxid")
     parser.add_argument("--oaklite-mxid")
@@ -916,16 +990,13 @@ def build_single_camera(camera_name, args):
 
     if camera_name in ("oak1_back", "oaklite_back"):
         devices_by_id = {device.deviceId: device for device in depthai_usb_oak_devices()}
-        if len(devices_by_id) < 2 and not (
-            args.oak1_mxid or args.oaklite_mxid
-        ):
-            raise RuntimeError("Need 2 visible USB OAK devices.")
         if camera_name == "oak1_back":
             device = pick_depthai_device(devices_by_id, args.oak1_mxid, 0, "oak1")
             label = "oak1_back"
         else:
+            fallback_index = 1 if len(devices_by_id) > 1 else 0
             device = pick_depthai_device(
-                devices_by_id, args.oaklite_mxid, 1, "oaklite"
+                devices_by_id, args.oaklite_mxid, fallback_index, "oaklite"
             )
             label = "oaklite_back"
         return CameraState(

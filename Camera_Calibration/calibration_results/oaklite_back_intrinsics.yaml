@@ -1,0 +1,25 @@
+%YAML:1.0
+---
+camera_name: oaklite_back
+camera_matrix: !!opencv-matrix
+   rows: 3
+   cols: 3
+   dt: d
+   data: [ 1424.3387966806022, 0., 988.52671025316181, 0.,
+       1429.6832640951316, 538.02718851797511, 0., 0., 1. ]
+dist_coeffs: !!opencv-matrix
+   rows: 1
+   cols: 5
+   dt: d
+   data: [ 0.16097787221531398, -0.30119577074766241,
+       -0.0015685035676393487, 0.0024001897508728626,
+       0.16706865891953462 ]
+reprojection_error: 1.1463738497578375
+image_width: 1920
+image_height: 1080
+fisheye_model: !!opencv-matrix
+   rows: 4
+   cols: 1
+   dt: d
+   data: [ 0., 0., 0., 0. ]
+valid_frames: 30
