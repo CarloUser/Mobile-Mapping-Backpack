@@ -103,13 +103,19 @@ For metric-grade results, hardware time sync (PTP/PPS, see
 `docs/setup/03_time_sync.md`) makes plain `header` the best choice.
 
 ### 1. Record a bag on the rig
-Only the two point-cloud topics are needed. While recording, follow the motion
-guidance above for 2-5 minutes in a feature-rich space (walls, furniture, corners
-&mdash; avoid wide-open fields and avoid moving people/vehicles in view).
+For the **basic KISS-ICP path**, only the two point-cloud topics are needed. While
+recording, follow the motion guidance above for 2-5 minutes in a feature-rich space
+(walls, furniture, corners &mdash; avoid wide-open fields and avoid moving
+people/vehicles in view).
 ```bash
 ros2 bag record -o lidar_calib_$(date +%Y%m%d_%H%M) \
     /lidar_points /livox/lidar
 ```
+For the **IMU-aided FAST-LIO path** (recommended &mdash; the Livox Avia's narrow,
+non-repetitive FOV defeats pure ICP, and FAST-LIO is what gave the verdict GOOD
+result), instead launch the Livox driver in **CustomMsg** mode and record both IMUs
+as well (`/lidar_points /lidar_imu /livox/lidar /livox/imu`), so each scan carries
+per-point time. Full build/run details are in `FASTLIO_GUIDE.md`.
 
 ### 2. Copy the bag to your PC
 ```bash
@@ -177,7 +183,7 @@ overwrite `extrinsics_initial.yaml` or `Coordinate_systems/coordinate_systems.ya
 This calibrates **only** Hesai&harr;Livox. With Hesai as the common reference, the
 next phases attach the cameras (target-based, ChArUco/AprilGrid &mdash; this is where
 the checkerboard returns), then the IMU (motion-based) and the GNSS lever arm.
-See `../RESUME_CONTEXT.md` for the full sensor plan.
+See `../../CALIBRATION_CONTEXT.md` for the full sensor plan.
 
 ## Method references
 

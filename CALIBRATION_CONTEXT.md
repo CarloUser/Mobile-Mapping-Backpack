@@ -169,8 +169,8 @@ slightly from the *physical* board used for the extrinsic stage (square length
 
 ## 4. Extrinsic calibration — overall strategy
 
-**Location:** `extrinsic_calibration/` (see `CALIBRATION_STRATEGY.md`,
-`METHOD_EVALUATION.md`, `RESUME_CONTEXT.md`).
+**Location:** `extrinsic_calibration/` (see `CALIBRATION_STRATEGY.md` and
+`METHOD_EVALUATION.md`).
 
 Goal: one consistent `base_link → sensor` transform per sensor, with the **Hesai
 JT128 as the fixed reference**. CAD values seed every step; refined values are

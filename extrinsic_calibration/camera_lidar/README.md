@@ -2,7 +2,31 @@
 
 Target-based (ChArUco) plane-correspondence calibration of each camera against
 its FOV-sharing LiDAR, chained to `base_link` through the Hesai reference.
-Read `CONTEXT.md` for the full method and geometry; this README is operational.
+
+## Method and geometry
+
+The two LiDARs face opposite ways and the cameras are split front/rear, so the
+**field-of-view map** decides which LiDAR each camera is calibrated against:
+
+| Camera | Direction | Calibrate against |
+| --- | --- | --- |
+| OAK-4D | front | Hesai (+ Insta360) |
+| OAK-1, OAK-D Lite, RealSense | rear | Livox (+ Insta360) |
+| Insta360 | omni | every sensor (loop-closure hub) |
+
+A flat ChArUco board is held still in many orientations inside the shared FOV of a
+camera and a LiDAR. On the **camera** side, the board is detected and `solvePnP`
+gives its plane — unit normal `n_c` and offset `d_c` — in the (optical) camera
+frame. On the **LiDAR** side, the board appears as a planar patch from which RANSAC
+fits a plane `(n_l, c_l)`. Across a spread of board tilts, aligning the plane
+normals (`n_c ≈ R n_l`, Kabsch) fixes the rotation, the plane offsets
+(`n_c·t = −(d_c + n_c·R c_l)`, least squares) fix the translation, and a
+point-to-plane refinement minimises the residual. The printed pattern is invisible
+to the LiDAR — only flatness, rigidity, isolation from background, and a spread of
+tilts/positions/distances matter. The Insta360, which overlaps every camera, ties
+the front and rear groups together for the (future) camera↔camera loop closures and
+a global pose-graph optimisation. Method reference: Zhang & Pless, IROS 2004; a
+target-less alternative is described in `KOIDE_CROSSCHECK.md`.
 
 ## Files
 
@@ -17,8 +41,8 @@ Read `CONTEXT.md` for the full method and geometry; this README is operational.
 
 ## Workflow
 
-1. **Confirm config.** Topic names in `config.yaml` are placeholders from
-   CONTEXT.md §7 — check with `ros2 topic list` while drivers run. Measure the
+1. **Confirm config.** Topic names in `config.yaml` are placeholders — check with
+   `ros2 topic list` while drivers run (and against `config/topics.yaml`). Measure the
    printed board and set `board:` exactly (squares, square/marker size,
    dictionary). Camera intrinsics must be good first (`CameraInfo` is used
    directly); refresh with the scripts in `../../Camera_Calibration/` if
@@ -50,10 +74,10 @@ Read `CONTEXT.md` for the full method and geometry; this README is operational.
 - Rear cameras (`oak1`, `oakd_lite`, `realsense`) calibrate against the Livox:
   the chain uses the **calibrated** `base_link→lidar_livox_avia` from the
   lidar_lidar stage (read from `extrinsics_calibrated.yaml` automatically).
-  The current Hesai↔Livox result is preliminary (validate said CHECK, stable
-  to ~1 cm/0.5°) — rear-camera chains inherit that uncertainty. Re-running
-  this stage after a better LiDAR↔LiDAR result only requires re-running the
-  chaining (the pairwise camera↔Livox solve is unaffected).
+  The Hesai↔Livox result is now verdict **GOOD** (after a `small_gicp` map-based
+  refinement), so rear-camera chains inherit a trustworthy reference. If that
+  LiDAR↔LiDAR result is ever updated, only the chaining needs re-running (the
+  pairwise camera↔Livox solve is unaffected).
 
 ## Caveats / open items
 
@@ -68,10 +92,12 @@ Read `CONTEXT.md` for the full method and geometry; this README is operational.
 - Insta360: confirm driver topic + image format (dual-fisheye vs
   equirectangular). `camera_model: fisheye` handles a single fisheye image
   with k1..k4; equirectangular would need a different projection (not built).
-- Not built yet (CONTEXT.md §4/§6 steps 3–5): `camera_camera.py` (Insta360
-  loop closures) and `global_optimize.py` (pose-graph over all edges).
-- `Oak_4_light` vs OAK-D Lite naming question from `../RESUME_CONTEXT.md` is
-  still open — confirm before trusting the `oakd_lite` CAD seed.
+- Not built yet (the loop-closure / global steps from the method above):
+  `camera_camera.py` (Insta360 loop closures) and `global_optimize.py` (pose-graph
+  over all edges).
+- `Oak_4_light` vs OAK-D Lite naming question (from the SolidWorks export; see
+  `../../CALIBRATION_CONTEXT.md`) is still open — confirm before trusting the
+  `oakd_lite` CAD seed.
 
 ## Validation
 
