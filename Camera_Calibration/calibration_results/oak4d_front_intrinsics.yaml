@@ -1,0 +1,25 @@
+%YAML:1.0
+---
+camera_name: oak4d_front
+camera_matrix: !!opencv-matrix
+   rows: 3
+   cols: 3
+   dt: d
+   data: [ 1429.4733322292009, 0., 1002.4238534461655, 0.,
+       1431.7477938413106, 508.49363665554273, 0., 0., 1. ]
+dist_coeffs: !!opencv-matrix
+   rows: 1
+   cols: 5
+   dt: d
+   data: [ 0.074841112425703626, -0.12545585170004195,
+       -0.017057454903365132, 0.0052206192802332447,
+       -0.037842268413935509 ]
+reprojection_error: 1.0762988218865901
+image_width: 1920
+image_height: 1080
+fisheye_model: !!opencv-matrix
+   rows: 4
+   cols: 1
+   dt: d
+   data: [ 0., 0., 0., 0. ]
+valid_frames: 30
